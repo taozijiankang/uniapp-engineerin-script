@@ -32,7 +32,7 @@ async function iterationVersion(options) {
   const { type = "patch" } = options;
 
   const remoteVersion = await new Promise((resolve, reject) => {
-    exec(`npm view ${packageJson.name}11 version`, (error, stdout, stderr) => {
+    exec(`npm view ${packageJson.name} version`, (error, stdout, stderr) => {
       if (error) {
         reject(error);
       }

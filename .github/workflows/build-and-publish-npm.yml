@@ -30,7 +30,7 @@ jobs:
       - name: 构建
         run: pnpm run build
       - name: 迭代版本号
-        run: pnpm run iteration-version
+        run: node ./.node/iteration-version.js -t patch
       - name: 配置 npm 令牌
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - name: 发布
