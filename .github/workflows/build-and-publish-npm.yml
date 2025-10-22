@@ -5,8 +5,8 @@ name: Publish Package to npmjs
 
 on:
   push:
-    tags:
-      - "release/v*" # v1.0.0
+    branches:
+      - master # 主分支
 
 jobs:
   build-and-publish-npm:
@@ -29,6 +29,8 @@ jobs:
         run: pnpm install
       - name: 构建
         run: pnpm run build
+      - name: 迭代版本号
+        run: pnpm run iteration-version
       - name: 发布
         run: pnpm publish -r --access public --no-git-checks
         env:
