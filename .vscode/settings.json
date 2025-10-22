@@ -1,0 +1,18 @@
+{
+    "editor.formatOnSave": true,
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "cSpell.words": [
+        "miniprogram",
+        "nodir",
+        "taozi",
+        "uniapp",
+        "WECHAT",
+        "weixin",
+        "wxtool"
+    ]
+}

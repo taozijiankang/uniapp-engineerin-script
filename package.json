@@ -1,0 +1,42 @@
+{
+  "name": "@taozi/uniapp-engineering-script",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "taozi-ues-app-start": "./src/bin/app-start.js",
+    "taozi-ues-cleanup-temp-folders": "./src/bin/cleanup-temp-folders.js",
+    "taozi-ues-copy-plugin": "./src/bin/copy-plugin.js",
+    "taozi-ues-create-app-pages": "./src/bin/create-app-pages.js",
+    "taozi-ues-create-core-pages": "./src/bin/create-core-pages.js",
+    "taozi-ues-elder-transform": "./src/bin/elder-transform.js",
+    "taozi-ues-generate-app-item-pages-json": "./src/bin/generate-app-item-pages-json.js",
+    "taozi-ues-open-app-in-wxtool": "./src/bin/open-app-in-wxtool.js",
+    "taozi-ues-release": "./src/bin/release.js",
+    "taozi-ues-runs": "./src/bin/runs.js",
+    "taozi-ues-start": "./src/bin/start.js",
+    "taozi-ues-test": "./src/bin/test.js"
+  },
+  "scripts": {
+    "build-w": "tsc -w"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.8",
+    "@types/js-yaml": "^4.0.9",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^12.1.0",
+    "dayjs": "^1.11.10",
+    "esbuild": "^0.25.6",
+    "fuzzy": "^0.1.3",
+    "glob": "^11.0.3",
+    "inquirer": "^8.2.5",
+    "inquirer-autocomplete-prompt": "2.0.0",
+    "inquirer-checkbox-plus-prompt": "^1.4.2",
+    "js-yaml": "^4.1.0",
+    "miniprogram-ci": "^2.0.10"
+  }
+}

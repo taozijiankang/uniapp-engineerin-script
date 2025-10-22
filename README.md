@@ -1,93 +1,258 @@
-# uniapp-engineerin-script
+# uniapp-engineering-script
 
+一个用于管理 uniapp 项目的工程化脚本工具集，提供项目启动、构建、发布、页面生成等功能。
 
+## 配置文件
 
-## Getting started
+### 配置文件获取方式
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+项目会在当前目录及上层目录中查找名为 `taozi-uniapp-engineering-script-config.mjs` 的配置文件。
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### 配置文件类型定义
 
-## Add your files
+配置文件需要导出一个符合 `ProjectConfig` 接口的对象：
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+```typescript
+interface ProjectConfig {
+  /** 应用配置列表 */
+  apps: AppConfig[];
+  /** 微信小程序配置 */
+  wx?: {
+    getAppInfo: (appConfig: AppConfig) => {
+      appid: string;
+      privateKey: string;
+    };
+  };
+  /** 分发 app */
+  distributionApp?: {
+    /** 获取 app 的 scripts */
+    getAppScripts?: (appConfig: AppConfig) => Record<string, string>;
+    /** 加载器 */
+    loaders?: Loader[];
+  };
+  /** 运行脚本配置 */
+  runsScripts?: {
+    /** 命令 key */
+    command: string;
+    /** 命令描述 */
+    description: string;
+  }[];
+  /** 环境变量字典 */
+  appEnvKeyDicts?: { value: string; label: string }[];
+  /** 批量处理app的并发数 */
+  appSyncHandleNumber?: number;
+  /** 创建 app 页面处理器 */
+  createAppPagesHandler?: (pageDir: string, page: Page) => void | Promise<void>;
+  /** 创建 core 页面处理器 */
+  createCorePagesHandler?: (pageDir: string, page: Page) => void | Promise<void>;
+}
 
+interface AppConfig {
+  /** app名字 */
+  name: string;
+  /** app 类型 */
+  type: AppType;
+  /** 描述 */
+  description: string;
+  /** 公共环境 */
+  comEnv?: AppEnv;
+  /** 所有环境 */
+  envs?: {
+    /** 环境名称 */
+    name: EnvName;
+    /** 环境描述 */
+    description: string;
+    /** ci机器人编号 1-9 */
+    ciRobot: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+    /** 环境配置 */
+    value: AppEnv;
+  }[];
+  /** 发布配置，用于批量发布小程序 */
+  release?: {
+    /** 发布类型，体验版 | 正式版本 */
+    type: MPVersionTypeValue;
+    /** 使用环境 */
+    env: EnvName;
+  }[];
+}
+
+type AppType = "cloud-outpatient" | "internet-hospital";
+type EnvName = "production" | "development" | "test";
+type MPVersionTypeValue = "trial" | "release";
 ```
-cd existing_repo
-git remote add origin http://47.112.189.179:8081/one/frontend/uniapp-engineerin-script.git
-git branch -M main
-git push -uf origin main
+
+## 命令说明
+
+### taozi-ues-app-start
+
+启动 uniapp 项目，支持开发模式和构建模式。
+
+**参数：**
+- `-p, --packageName <packageName>` - 项目package.json中的name字段
+- `-m, --mode <mode>` - 模式，可选值：`dev|build`
+- `-e, --env <env>` - 环境
+- `-o, --openInWXTool <openInWXTool>` - 是否在微信开发者工具中打开，可选值：`yes|no`
+- `-u, --upload <upload>` - 是否上传小程序，可选值：`yes|no`
+- `-v, --versionType <versionType>` - 上传小程序类型，可选值：`trial|release`
+- `-t, --updateVersion <updateVersion>` - 更新版本，可选类型：`none|patch|minor|major`，或者一个版本号，如：1.0.0
+- `-c, --ifCreateApp <ifCreateApp>` - 是否创建项目，可选值：`yes|no`
+
+**示例：**
+```bash
+taozi-ues-app-start -p my-app -m dev -e development
 ```
 
-## Integrate with your tools
+### taozi-ues-cleanup-temp-folders
 
-- [ ] [Set up project integrations](http://47.112.189.179:8081/one/frontend/uniapp-engineerin-script/-/settings/integrations)
+清理临时文件夹。
 
-## Collaborate with your team
+**参数：** 无
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+**示例：**
+```bash
+taozi-ues-cleanup-temp-folders
+```
 
-## Test and Deploy
+### taozi-ues-copy-plugin
 
-Use the built-in continuous integration in GitLab.
+复制插件到分包目录。
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+**参数：** 无
 
-***
+**示例：**
+```bash
+taozi-ues-copy-plugin
+```
 
-# Editing this README
+### taozi-ues-create-app-pages
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+创建应用页面。
 
-## Suggestions for a good README
+**参数：** 无
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+**示例：**
+```bash
+taozi-ues-create-app-pages
+```
 
-## Name
-Choose a self-explaining name for your project.
+### taozi-ues-create-core-pages
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+创建核心页面。
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+**参数：** 无
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+**示例：**
+```bash
+taozi-ues-create-core-pages
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### taozi-ues-elder-transform
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+对小程序进行老年化适配转换，包括添加 page-meta 和转换字体大小。
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**参数：** 无
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+**示例：**
+```bash
+taozi-ues-elder-transform
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### taozi-ues-generate-app-item-pages-json
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+根据 pages.ts 配置生成 pages.json 文件。
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+**参数：** 无
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+**示例：**
+```bash
+taozi-ues-generate-app-item-pages-json
+```
 
-## License
-For open source projects, say how it is licensed.
+### taozi-ues-open-app-in-wxtool
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+在微信开发者工具中打开项目。
+
+**参数：**
+- `-p, --appPath <appPath>` - 项目路径
+- `-t, --openType <openType>` - 打开类型，可选值：`dev|build`
+
+**示例：**
+```bash
+taozi-ues-open-app-in-wxtool -p /path/to/app -t dev
+```
+
+### taozi-ues-release
+
+批量发布项目。
+
+**参数：**
+- `-s, --apps <apps>` - 要发布的项目，多个项目用逗号分隔，query 参数格式：`packageName=xxx&env=xxx&type=xxx&version=xxx`
+- `-a, --all` - 是否发布所有项目
+
+**示例：**
+```bash
+taozi-ues-release -s "my-app&env=production&type=release&version=1.0.0"
+taozi-ues-release -a
+```
+
+### taozi-ues-runs
+
+运行项目脚本。
+
+**参数：**
+- `-s, --commands <commands>` - 要执行的命令，多个命令用逗号分隔
+
+**示例：**
+```bash
+taozi-ues-runs -s "start,test"
+```
+
+### taozi-ues-start
+
+启动主流程，包括创建页面和选择启动类型。
+
+**参数：** 无
+
+**示例：**
+```bash
+taozi-ues-start
+```
+
+### taozi-ues-test
+
+测试命令。
+
+**参数：** 无
+
+**示例：**
+```bash
+taozi-ues-test
+```
+
+## 安装和使用
+
+1. 安装依赖：
+```bash
+pnpm install
+```
+
+2. 构建项目：
+```bash
+pnpm run build-w
+```
+
+3. 在项目根目录创建配置文件 `taozi-uniapp-engineering-script-config.mjs`
+
+4. 使用相应的命令进行项目操作
+
+## 许可证
+
+本项目采用 [MIT 许可证](LICENSE)。
+
+## 贡献
+
+欢迎提交 Issue 和 Pull Request 来改进这个项目。
+
+## 作者
+
+Taozi
