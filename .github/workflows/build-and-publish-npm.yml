@@ -30,6 +30,6 @@ jobs:
       - name: 构建
         run: pnpm run build
       - name: 发布
-        run: pnpm publish -r --access public
+        run: pnpm publish -r --access public --no-git-checks
         env:
           NPM_TOKEN: ${{secrets.NPM_TOKEN}}
