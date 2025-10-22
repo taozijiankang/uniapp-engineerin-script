@@ -32,6 +32,6 @@ jobs:
       - name: 迭代版本号
         run: pnpm run iteration-version
       - name: 发布
-        run: pnpm publish -r --access public --no-git-checks
+        run: pnpm publish -r --access public --no-git-checks ${{secrets.NPM_TOKEN}}
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
