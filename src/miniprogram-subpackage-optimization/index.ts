@@ -2,11 +2,17 @@ import chalk from "chalk";
 import { copySync } from "fs-extra/esm";
 import { sync as globbySync } from "globby";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 
 import { deleteOriginNodeModules, deletePackageNodeModulesPageDir, getNeedPackageDirNames, replacePackageFiles } from "./util.js";
 
 export interface IMiniprogramSubpackageOptimizationOptions {
+  /**
+   * 项目构建目录路径
+   * 默认值为 ./dist/build/mp-weixin
+   * 如果为绝对路径，则直接使用该路径
+   * 如果为相对路径，则相对于当前工作目录
+   */
   projectDistPath?: string;
   originDirName?: string;
   targetDirTag?: string;
@@ -32,7 +38,7 @@ export default async function miniprogramSubpackageOptimization(options: IMinipr
     onlyOptimizeMainPackage = false,
   } = options;
   const cwdPath = process.cwd();
-  const projectPath = join(cwdPath, projectDistPath);
+  const projectPath = isAbsolute(projectDistPath) ? projectDistPath : join(cwdPath, projectDistPath);
 
   // 查找 node-modules 目录的位置
   let nodeModulesDirPath = join(projectPath, originDirName);
