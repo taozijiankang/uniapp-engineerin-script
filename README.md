@@ -168,6 +168,27 @@ taozi-ues-elder-transform
 taozi-ues-generate-app-item-pages-json
 ```
 
+### taozi-ues-miniprogram-subpackage-optimization
+
+小程序分包优化，用于优化小程序的分包结构和文件引用路径。
+
+**参数：**
+- `-p, --project-dist-path <path>` - 项目构建目录路径，默认为 `./dist/build/mp-weixin`
+- `-o, --origin-dir-name <name>` - 原始 node-modules 目录名称，默认为 `node-modules`
+- `-t, --target-dir-tag <tag>` - 目标目录标签，默认为 `pages`
+
+**功能：**
+- 将根目录的 node-modules 复制到所有分包中
+- 调整分包文件对 node-modules 的引用路径
+- 调整 node-modules 文件对 vendor.js 的引用路径
+- 删除分包中多余的 pages 和 components 目录
+
+**示例：**
+```bash
+taozi-ues-miniprogram-subpackage-optimization
+taozi-ues-miniprogram-subpackage-optimization -p ./dist/build/mp-weixin -o node-modules -t pages
+```
+
 ### taozi-ues-open-app-in-wxtool
 
 在微信开发者工具中打开项目。
