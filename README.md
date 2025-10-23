@@ -276,4 +276,6 @@ pnpm run build-w
 
 ## 作者
 
-Taozi
+yayaluoya@sina.com
+
+关于miniprogram-subpackage-optimization 使用的是 包miniprogram-subpackage-optimization-monorepo
