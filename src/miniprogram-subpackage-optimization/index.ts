@@ -28,7 +28,7 @@ const defaultNodeModulesPathPattern = /(\.\.\/)+node-modules\/[^"']*/g;
  * 小程序分包优化
  * @param options 小程序分包优化选项
  */
-export default async function miniprogramSubpackageOptimization(options: IMiniprogramSubpackageOptimizationOptions) {
+export default async function miniprogramSubpackageOptimization(options: IMiniprogramSubpackageOptimizationOptions = {}) {
   const {
     projectDistPath = "./dist/build/mp-weixin",
     originDirName = "node-modules",
