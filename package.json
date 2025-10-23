@@ -11,6 +11,7 @@
     "taozi-ues-create-core-pages": "dist/bin/create-core-pages.js",
     "taozi-ues-elder-transform": "dist/bin/elder-transform.js",
     "taozi-ues-generate-app-item-pages-json": "dist/bin/generate-app-item-pages-json.js",
+    "taozi-ues-miniprogram-subpackage-optimization": "dist/bin/miniprogram-subpackage-optimization.js",
     "taozi-ues-open-app-in-wxtool": "dist/bin/open-app-in-wxtool.js",
     "taozi-ues-release": "dist/bin/release.js",
     "taozi-ues-runs": "dist/bin/runs.js",
