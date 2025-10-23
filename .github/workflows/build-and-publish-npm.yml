@@ -6,7 +6,7 @@ name: Publish Package to npmjs
 on:
   push:
     branches:
-      - master # 主分支
+      - release # 发布分支
 
 jobs:
   build-and-publish-npm:
