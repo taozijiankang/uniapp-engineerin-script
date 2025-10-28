@@ -77,7 +77,7 @@ export type MPVersionTypeValue = "trial" | "release";
  */
 export type EnvName = "production" | "development" | "test";
 
-export interface AppConfig<AppEnv extends Record<string, string> = Record<string, string>> {
+export interface AppConfig<AppEnv extends any = any> {
   /** app名字 */
   name: string;
   /** app 类型 */
