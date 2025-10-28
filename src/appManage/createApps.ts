@@ -19,7 +19,7 @@ export async function createApps(
 ) {
   const { appPackageDir, appSyncHandleNumber, appEnvKeyDicts, distributionApp, wxConfig } = op;
 
-  const linkDirs = ["src/TUICallKit-Wechat", "src/uni_modules"];
+  const linkDirs = ["src/TUICallKit-Wechat", "src/TUICallKit-Vue", "src/uni_modules"];
 
   // 复制公共文件
   const appFiles = await glob("**", {
