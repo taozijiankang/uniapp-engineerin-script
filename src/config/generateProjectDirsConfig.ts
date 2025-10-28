@@ -59,6 +59,7 @@ function getAppsContainerDir(rootDir: string) {
     path.join(appsContainerDir, `./pnpm-workspace.yaml`),
     yaml.dump({
       packages: [...pnpmWorkspaces, "apps/*/*"],
+      catalog: pnpmWorkspaceYaml.catalog,
     })
   );
   // 创建package.json

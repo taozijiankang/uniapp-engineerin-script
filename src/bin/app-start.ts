@@ -255,8 +255,8 @@ async function appStart(args: AppStartOptions) {
         wxConfig: config.wx,
       }
     );
-    console.log(chalk.green("\n安装app项目依赖"), onSelectAppConfig.name, onSelectAppConfig.path);
-    await runCommand(`pnpm i --filter ${args.packageName}`, {
+    console.log(chalk.green("\n安装app项目依赖"));
+    await runCommand("pnpm i", {
       cwd: config.dirs.appsContainerDir,
     });
   }
