@@ -1,4 +1,4 @@
-import { AppType, EnvName } from "../types/config.js";
+import { EnvName } from "../types/config.js";
 import { AppStartMode, MPVersionType, ProjectStartType, ConfirmType, UpdateVersionType, OpenWxToolType } from "./enum.js";
 
 export const ProjectStartTypeDicts = [
@@ -76,17 +76,6 @@ export const AppEnvModeDescriptionDicts: { value: EnvName; label: string }[] = [
   {
     value: "production",
     label: "🚀 生产环境",
-  },
-];
-
-export const AppTypeDescriptionDicts: { value: AppType; label: string }[] = [
-  {
-    value: "cloud-outpatient",
-    label: "云门诊",
-  },
-  {
-    value: "internet-hospital",
-    label: "互联网医院",
   },
 ];
 
