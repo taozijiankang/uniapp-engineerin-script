@@ -40,14 +40,14 @@ async function start() {
 
   await Promise.all([
     runTask({
-      command: `pnpm run create-core-pages`,
-      title: "packages/core: pnpm run create-core-pages",
+      command: `pnpm run start`,
+      title: "packages/core: pnpm run start",
       color: "#f9ed69",
       cwd: config.dirs.corePackageDir,
     }),
     runTask({
-      command: `pnpm run create-app-pages`,
-      title: "packages/app: pnpm run create-app-pages",
+      command: `pnpm run start`,
+      title: "packages/app: pnpm run start",
       color: "#f08a5d",
       cwd: config.dirs.appPackageDir,
     }),
