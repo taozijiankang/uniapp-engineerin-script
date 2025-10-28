@@ -47,7 +47,7 @@ async function createAppPages() {
         recursive: true,
       });
     }
-    await createAppPagesHandler?.(pagePath, page);
+    await createAppPagesHandler?.(pagePath, page.pageConfig);
   }
 
   // 删除多余的页面
