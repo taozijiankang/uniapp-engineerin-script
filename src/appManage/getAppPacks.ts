@@ -9,6 +9,7 @@ export function getAppPacks(appPages: PagesConfig) {
           name: item.name || "",
           path: item.path.replace(/^pages\//, ""),
           title: item.style?.navigationBarTitleText || item.name || "",
+          pageConfig: item,
         };
         return res;
       }),
@@ -22,6 +23,7 @@ export function getAppPacks(appPages: PagesConfig) {
               name: item.name || "",
               path: item.path,
               title: item.style?.navigationBarTitleText || item.name || "",
+              pageConfig: item,
             };
             return res;
           }) || [],

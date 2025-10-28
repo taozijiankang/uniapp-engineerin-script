@@ -47,7 +47,7 @@ async function createCorePages() {
         recursive: true,
       });
     }
-    await createCorePagesHandler?.(pageComPath, page);
+    await createCorePagesHandler?.(pageComPath, page.pageConfig);
   }
 }
 

@@ -4,6 +4,7 @@ export interface PackConfig {
     name: string;
     path: string;
     title: string;
+    pageConfig: Page;
   }[];
 }
 
