@@ -43,9 +43,18 @@ export async function uploadMp(options: {
     `${appVersionType === AppVersionType.RELEASE ? 1 : 2}${appConfig.envs?.find((item) => item.name === env)?.ciRobot || 0}`
   );
 
-  console.log(`获取小程序 ${appid} 机器人 ${robotNumber} 最新版本...`);
-  const latestVersion = await getAppLatestVersion(project, robotNumber);
-  console.log(`小程序 ${appid} 机器人 ${robotNumber} 最新版本为: ${latestVersion}`);
+  console.log(`获取小程序 ${appConfig.description || appConfig.name} 机器人 ${robotNumber} 最新版本...`);
+  const latestVersion = await getAppLatestVersion(project, robotNumber)
+    .then((version) => {
+      console.log(`小程序 ${appConfig.description || appConfig.name} 机器人 ${robotNumber} 最新版本为: ${version}`);
+      return version;
+    })
+    .catch((error) => {
+      console.error(`获取小程序 ${appConfig.description || appConfig.name} 最新版本失败，机器人: ${robotNumber}，错误:`, error);
+      const version = JSON.parse(fs.readFileSync(path.join(appConfig.path, "package.json"), "utf8")).version;
+      console.log(`使用 package.json 中的版本号: ${version}`);
+      return version;
+    });
 
   const upload = async () => {
     const uploadResult = await ci.upload({
@@ -79,33 +88,28 @@ async function getAppLatestVersion(project: CIProject, robotNumber: number) {
     fs.mkdirSync(path.dirname(sourceMapSavePath), { recursive: true });
   }
 
-  try {
-    await ci.getDevSourceMap({
-      project,
-      robot: robotNumber,
-      sourceMapSavePath,
-    });
+  await ci.getDevSourceMap({
+    project,
+    robot: robotNumber,
+    sourceMapSavePath,
+  });
 
-    const directory = await unzipper.Open.file(sourceMapSavePath);
-    const appServiceMapFile = directory.files.find((item) =>
-      /^\/(__APP__|__FULL__)\/(app-service\.js\.map|appservice\.app\.js\.map)$/.test(item.path)
+  const directory = await unzipper.Open.file(sourceMapSavePath);
+  const appServiceMapFile = directory.files.find((item) =>
+    /^\/(__APP__|__FULL__)\/(app-service\.js\.map|appservice\.app\.js\.map)$/.test(item.path)
+  );
+  if (!appServiceMapFile) {
+    throw new Error(
+      `获取小程序${appid}最新版本失败，机器人: ${robotNumber}，错误: (__APP__|__FULL__)/(app-service.js.map|appservice.app.js.map) 文件不存在`
     );
-    if (!appServiceMapFile) {
-      throw new Error(
-        `获取小程序${appid}最新版本失败，机器人: ${robotNumber}，错误: (__APP__|__FULL__)/(app-service.js.map|appservice.app.js.map) 文件不存在`
-      );
-    }
-    const appServiceMap: {
-      wx: {
-        version: string | number;
-        userVersion: string;
-        userNotes: string;
-      };
-    } = JSON.parse((await appServiceMapFile.buffer()).toString());
-
-    return appServiceMap.wx.userVersion;
-  } catch (error) {
-    console.error(`获取小程序${appid}最新版本失败，机器人: ${robotNumber}，错误:`, error);
   }
-  return "1.0.0";
+  const appServiceMap: {
+    wx: {
+      version: string | number;
+      userVersion: string;
+      userNotes: string;
+    };
+  } = JSON.parse((await appServiceMapFile.buffer()).toString());
+
+  return appServiceMap.wx.userVersion;
 }
