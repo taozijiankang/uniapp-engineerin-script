@@ -26,6 +26,7 @@
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.8",
     "@types/js-yaml": "^4.0.9",
+    "@types/unzipper": "^0.10.11",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -41,6 +42,7 @@
     "inquirer-autocomplete-prompt": "2.0.0",
     "inquirer-checkbox-plus-prompt": "^1.4.2",
     "js-yaml": "^4.1.0",
-    "miniprogram-ci": "^2.0.10"
+    "miniprogram-ci": "^2.0.10",
+    "unzipper": "^0.12.3"
   }
 }

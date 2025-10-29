@@ -11,12 +11,12 @@ import path from "path";
 import {
   AppStartMode,
   AppStartModeDicts,
+  AppVersionType,
+  AppVersionTypeDicts,
   ConfirmType,
   ConfirmTypeDicts,
-  MPVersionType,
-  MPVersionTypeDicts,
-  UpdateVersionType,
-  UpdateVersionTypeDicts,
+  UpdateVersionNumType,
+  UpdateVersionNumTypeDicts,
 } from "../constants/index.js";
 import { packageJson } from "../packageJson.js";
 import { openWXTool } from "../utils/openWXTool.js";
@@ -25,8 +25,6 @@ import { uploadMp } from "../utils/uploadMp.js";
 import { getConfig } from "../config/index.js";
 import { getApps } from "../appManage/getApps.js";
 import { createApps } from "../appManage/createApps.js";
-import { getAppUpdateVersion, setAppVersion } from "../appManage/version.js";
-import { MPVersionTypeValue } from "../types/config.js";
 
 inquirer.registerPrompt("autocomplete", autocompletePrompt);
 
@@ -41,11 +39,11 @@ interface AppStartOptions {
   openInWXTool: string;
   /**  是否上传小程序 */
   upload: string;
-  /**  上传小程序类型 */
-  versionType: string;
-  /**  更新版本 */
-  updateVersion: string;
-  /**  是否创建项目 */
+  /** 小程序版本类型 */
+  appVersionType: string;
+  /** 更新版本号类型 */
+  updateVersionNumType: string;
+  /** 是否创建项目 */
   ifCreateApp: string;
 }
 
@@ -60,10 +58,13 @@ program
     `是否在微信开发者工具中打开，可选值：${ConfirmTypeDicts.map((item) => item.value).join("|")}`
   )
   .option("-u, --upload <upload>", `是否上传小程序，可选值：${ConfirmTypeDicts.map((item) => item.value).join("|")}`)
-  .option("-v, --versionType <versionType>", `上传小程序类型，可选值：${MPVersionTypeDicts.map((item) => item.value).join("|")}`)
   .option(
-    "-t, --updateVersion <updateVersion>",
-    `更新版本，可选类型：${UpdateVersionTypeDicts.map((item) => item.value).join("|")}，或者一个版本号，如：1.0.0`
+    "-v, --appVersionType <appVersionType>",
+    `小程序版本类型，可选值：${AppVersionTypeDicts.map((item) => item.value).join("|")}`
+  )
+  .option(
+    "-t, --updateVersionNumType <updateVersionNumType>",
+    `更新版本号类型，可选值：${UpdateVersionNumTypeDicts.map((item) => item.value).join("|")}`
   )
   .option("-c, --ifCreateApp <ifCreateApp>", `是否创建项目，可选值：${ConfirmTypeDicts.map((item) => item.value).join("|")}`)
   .action(() => {
@@ -198,46 +199,42 @@ async function appStart(args: AppStartOptions) {
       }
     }
     if (args.upload === ConfirmType.YES) {
-      if (!args.versionType) {
-        const { versionType } = await inquirer.prompt([
+      if (!args.appVersionType) {
+        const { appVersionType } = await inquirer.prompt([
           {
             type: "list",
-            name: "versionType",
-            message: "请选择上传类型：",
-            default: MPVersionType.TRIAL,
-            choices: MPVersionTypeDicts.map((item) => ({
+            name: "appVersionType",
+            message: "请选择小程序版本类型：",
+            default: AppVersionType.TRIAL,
+            choices: AppVersionTypeDicts.map((item) => ({
               value: item.value,
               name: item.label,
             })),
           },
         ]);
-        args.versionType = versionType;
+        args.appVersionType = appVersionType;
       } else {
-        if (!MPVersionTypeDicts.find((item) => item.value === args.versionType)) {
-          throw new Error(`无效的上传类型: ${args.versionType}`);
+        if (!AppVersionTypeDicts.find((item) => item.value === args.appVersionType)) {
+          throw new Error(`无效的小程序版本类型: ${args.appVersionType}`);
         }
       }
-      if (!args.updateVersion) {
-        const { updateVersionType } = await inquirer.prompt([
+      if (!args.updateVersionNumType) {
+        const { updateVersionNumType } = await inquirer.prompt([
           {
             type: "list",
-            name: "updateVersionType",
-            message: "请选择更新版本类型：",
-            default: UpdateVersionType.PATCH,
-            choices: UpdateVersionTypeDicts.map((item) => ({
+            name: "updateVersionNumType",
+            message: "请选择更新版本号类型：",
+            default: UpdateVersionNumType.PATCH,
+            choices: UpdateVersionNumTypeDicts.map((item) => ({
               value: item.value,
               name: item.label,
             })),
           },
         ]);
-        args.updateVersion = updateVersionType;
+        args.updateVersionNumType = updateVersionNumType;
       } else {
-        if (
-          !(
-            UpdateVersionTypeDicts.find((item) => item.value === args.updateVersion) || /^\d+\.\d+\.\d+$/.test(args.updateVersion)
-          )
-        ) {
-          throw new Error(`无效的更新版本: ${args.updateVersion}`);
+        if (!UpdateVersionNumTypeDicts.find((item) => item.value === args.updateVersionNumType)) {
+          throw new Error(`无效的更新版本号类型: ${args.updateVersionNumType}`);
         }
       }
     }
@@ -301,20 +298,19 @@ async function appStart(args: AppStartOptions) {
 
   if (!!config.wx && args.mode === AppStartMode.BUILD && args.upload === ConfirmType.YES) {
     console.log(chalk.yellow("\n开始上传小程序"));
-    /** @type {string} */
-    let version = "";
-    if (UpdateVersionTypeDicts.find((item) => item.value === args.updateVersion)) {
-      version = getAppUpdateVersion(onSelectAppConfig.path, args.updateVersion);
-    } else {
-      version = args.updateVersion;
-    }
+
     const { appid, privateKey } = config.wx.getAppInfo(onSelectAppConfig);
     if (!appid || !privateKey) {
       throw new Error(`微信小程序id或私钥未配置: ${onSelectAppConfig.name} ${onSelectAppConfig.description}`);
     }
-    await uploadMp(onSelectAppConfig, args.versionType as MPVersionTypeValue, args.env, version, appid, privateKey);
-
-    setAppVersion(onSelectAppConfig.path, version);
+    await uploadMp({
+      appConfig: onSelectAppConfig,
+      appVersionType: args.appVersionType as AppVersionType,
+      env: args.env,
+      updateVersionNumType: args.updateVersionNumType as UpdateVersionNumType,
+      appid,
+      privateKey,
+    });
 
     console.log(chalk.green("\n上传小程序成功"));
   }

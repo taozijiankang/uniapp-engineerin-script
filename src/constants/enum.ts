@@ -1,47 +1,45 @@
-import { MPVersionTypeValue } from "../types/config.js";
-
-export const ProjectStartType = {
+export enum ProjectStartType {
   /** 普通类型 */
-  COMMON: "common",
+  COMMON = "common",
   /** 发布类型 */
-  RELEASE: "release",
-};
+  RELEASE = "release",
+}
 
-export const AppStartMode = {
+export enum AppStartMode {
   /** 开发模式 */
-  DEV: "dev",
+  DEV = "dev",
   /** 构建模式 */
-  BUILD: "build",
-};
+  BUILD = "build",
+}
 
-export const MPVersionType: { TRIAL: MPVersionTypeValue; RELEASE: MPVersionTypeValue } = {
+export enum AppVersionType {
   /** 体验版本 */
-  TRIAL: "trial",
+  TRIAL = "trial",
   /** 正式版本 */
-  RELEASE: "release",
-};
+  RELEASE = "release",
+}
 
-export const ConfirmType = {
+export enum ConfirmType {
   /** 是 */
-  YES: "yes",
+  YES = "yes",
   /** 否 */
-  NO: "no",
-};
+  NO = "no",
+}
 
-export const UpdateVersionType = {
+export enum UpdateVersionNumType {
   /** 不更新 */
-  NONE: "none",
+  NONE = "none",
   /** 主版本 */
-  MAJOR: "major",
+  MAJOR = "major",
   /** 次版本 */
-  MINOR: "minor",
+  MINOR = "minor",
   /** 修订版本 */
-  PATCH: "patch",
-};
+  PATCH = "patch",
+}
 
-export const OpenWxToolType = {
+export enum OpenWxToolType {
   /** 开发目录 */
-  DEV: "dev",
+  DEV = "dev",
   /** 构建目录 */
-  BUILD: "build",
-};
+  BUILD = "build",
+}

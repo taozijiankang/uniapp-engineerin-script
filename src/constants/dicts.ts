@@ -1,5 +1,5 @@
 import { EnvName } from "../types/config.js";
-import { AppStartMode, MPVersionType, ProjectStartType, ConfirmType, UpdateVersionType, OpenWxToolType } from "./enum.js";
+import { AppStartMode, AppVersionType, ProjectStartType, ConfirmType, UpdateVersionNumType, OpenWxToolType } from "./enum.js";
 
 export const ProjectStartTypeDicts = [
   {
@@ -23,13 +23,13 @@ export const AppStartModeDicts = [
   },
 ];
 
-export const MPVersionTypeDicts = [
+export const AppVersionTypeDicts = [
   {
-    value: MPVersionType.TRIAL,
+    value: AppVersionType.TRIAL,
     label: "🔍 体验版本",
   },
   {
-    value: MPVersionType.RELEASE,
+    value: AppVersionType.RELEASE,
     label: "🎯 正式版本",
   },
 ];
@@ -45,21 +45,21 @@ export const ConfirmTypeDicts = [
   },
 ];
 
-export const UpdateVersionTypeDicts = [
+export const UpdateVersionNumTypeDicts = [
   {
-    value: UpdateVersionType.NONE,
+    value: UpdateVersionNumType.NONE,
     label: "不更新",
   },
   {
-    value: UpdateVersionType.PATCH,
+    value: UpdateVersionNumType.PATCH,
     label: "修订版本",
   },
   {
-    value: UpdateVersionType.MINOR,
+    value: UpdateVersionNumType.MINOR,
     label: "次版本",
   },
   {
-    value: UpdateVersionType.MAJOR,
+    value: UpdateVersionNumType.MAJOR,
     label: "主版本",
   },
 ];
