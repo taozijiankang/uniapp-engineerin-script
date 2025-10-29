@@ -11,7 +11,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { Colors, FailColor, SuccessColor } from "../constants/color.js";
-import { AppStartMode, ConfirmType, MPVersionTypeDicts, UpdateVersionType, UpdateVersionTypeDicts } from "../constants/index.js";
+import {
+  AppStartMode,
+  ConfirmType,
+  UpdateVersionNumType,
+  UpdateVersionNumTypeDicts,
+  AppVersionType,
+  AppVersionTypeDicts,
+} from "../constants/index.js";
 import { packageJson } from "../packageJson.js";
 import { createLog } from "../utils/createLog.js";
 import { chunkArray, getQueryString, parseQueryString } from "../utils/global.js";
@@ -20,7 +27,6 @@ import { getConfig } from "../config/index.js";
 import { getApps } from "../appManage/getApps.js";
 import { cleanupTempHashFolders } from "../utils/cleanupTempFolders.js";
 import { createApps } from "../appManage/createApps.js";
-import { getAppUpdateVersion } from "../appManage/version.js";
 
 // 注册自定义 prompt（必须）
 inquirer.registerPrompt("checkbox-plus", CheckboxPlus);
@@ -38,8 +44,8 @@ interface ReleaseOptions {
 interface ReleaseApp {
   packageName: string;
   env: string;
-  type: string;
-  version: string;
+  appVersionType: string;
+  updateVersionNumType: string;
 }
 
 program
@@ -115,14 +121,13 @@ async function release(args: ReleaseOptions) {
       return;
     }
 
-    /** @type {{updateVersionType: string}} */
-    const { updateVersionType } = await inquirer.prompt([
+    const { updateVersionNumType }: { updateVersionNumType: UpdateVersionNumType } = await inquirer.prompt([
       {
         type: "list",
-        name: "updateVersionType",
-        message: "请选择更新版本类型：",
-        default: UpdateVersionType.PATCH,
-        choices: UpdateVersionTypeDicts.map((item) => ({
+        name: "updateVersionNumType",
+        message: "请选择更新版本号类型：",
+        default: UpdateVersionNumType.PATCH,
+        choices: UpdateVersionNumTypeDicts.map((item) => ({
           value: item.value,
           name: item.label,
         })),
@@ -149,11 +154,10 @@ async function release(args: ReleaseOptions) {
       }
       releaseApps.push(
         ...(appConfig.release?.map((item) => ({
-          ...item,
           packageName: appPackageName,
           env: item.env,
-          type: item.type,
-          version: getAppUpdateVersion(appConfig.path, updateVersionType),
+          appVersionType: item.type as AppVersionType,
+          updateVersionNumType: updateVersionNumType,
         })) || [])
       );
     }
@@ -237,12 +241,14 @@ async function release(args: ReleaseOptions) {
           console.error(`未找到项目: ${appPackageName}`);
           return;
         }
-        for (const { env, type, version } of releaseApps.filter((item) => item.packageName === appPackageName)) {
+        for (const { env, appVersionType, updateVersionNumType } of releaseApps.filter(
+          (item) => item.packageName === appPackageName
+        )) {
           releaseResults.push({
             packageName: appPackageName,
             env,
-            type,
-            version,
+            appVersionType,
+            updateVersionNumType,
             ...(await runTask({
               logFileName: `${appConfig.type}-${appConfig.name}`,
               command: [
@@ -251,13 +257,13 @@ async function release(args: ReleaseOptions) {
                 `-m ${AppStartMode.BUILD}`,
                 `-e ${env}`,
                 `-u ${ConfirmType.YES}`,
-                `-v ${type}`,
-                `-t ${version}`,
+                `-v ${appVersionType}`,
+                `-t ${updateVersionNumType}`,
                 `-c ${ConfirmType.NO}`,
               ].join(" "),
               title: `发布App[${appConfig.index}]: ${appConfig.description || appConfig.name} 环境: ${
                 appConfig.envs?.find((item) => item.name === env)?.description || env
-              } 版本: ${MPVersionTypeDicts.find((item) => item.value === type)?.label || type}`,
+              } 版本: ${AppVersionTypeDicts.find((item) => item.value === appVersionType)?.label || appVersionType}`,
               color: Colors[appConfig.index] || "#f9ed69",
               cwd: config.dirs.rootDir,
             })),
@@ -293,15 +299,14 @@ async function release(args: ReleaseOptions) {
       "\n",
       chalk.green(
         `pnpm run release -s "${failResults
-          .map(({ packageName, env, type, version }) => {
-            /** @type {ReleaseApp} */
-            const releaseApp = {
+          .map(({ packageName, env, appVersionType, updateVersionNumType }) => {
+            const releaseApp: ReleaseApp = {
               packageName,
               env,
-              type,
-              version,
+              appVersionType,
+              updateVersionNumType,
             };
-            return getQueryString(releaseApp);
+            return getQueryString(releaseApp as unknown as Record<string, string>);
           })
           .join(",")}"`
       ),
