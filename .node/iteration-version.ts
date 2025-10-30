@@ -32,7 +32,9 @@ program
   .parse(process.argv);
 
 async function iterationVersion(options: IterationVersionOptions) {
-  const { major = "1", minor = "0" } = options;
+  let { major = "1", minor = "0" } = options;
+  major = parseInt(major.trim()).toString();
+  minor = parseInt(minor.trim()).toString();
 
   console.log(`主版本：${major}，次版本：${minor}`);
 
@@ -65,8 +67,6 @@ async function iterationVersion(options: IterationVersionOptions) {
   let newVersion = `${major}.${minor}.${remotePatch + 1}`;
 
   console.log(`${packageJson.name} 的版本号从 ${remoteVersion} 迭代为 ${newVersion}`);
-
-  return;
 
   packageJson.version = newVersion;
 
