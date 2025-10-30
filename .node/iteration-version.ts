@@ -33,10 +33,11 @@ program
 
 async function iterationVersion(options: IterationVersionOptions) {
   let { major = "1", minor = "0" } = options;
-  major = parseInt(major.trim()).toString();
-  minor = parseInt(minor.trim()).toString();
 
   console.log(`主版本：${major}，次版本：${minor}`);
+
+  major = parseInt(major.trim()).toString();
+  minor = parseInt(minor.trim()).toString();
 
   const remoteVersion = await new Promise<string>((resolve, reject) => {
     exec(`npm view ${packageJson.name} version`, (error, stdout, stderr) => {
