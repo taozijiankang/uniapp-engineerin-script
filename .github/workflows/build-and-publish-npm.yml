@@ -43,7 +43,7 @@ jobs:
         run: pnpm run build
 
       - name: 迭代版本号
-        run: node ./dist_node/iteration-version.js -m $MAJOR_VERSION -n $MINOR_VERSION
+        run: node ./dist_node/iteration-version.js -m "$MAJOR_VERSION" -n "$MINOR_VERSION"
 
       - name: 发布包到 npm
         run: pnpm publish -r --access public --no-git-checks
