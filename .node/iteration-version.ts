@@ -17,6 +17,10 @@ interface IterationVersionOptions {
   minor?: string;
 }
 
+/**
+ * 指定主版本号和次版本号，自动迭代修订版本号
+ */
+
 program
   .version(packageJson.version)
   .description("迭代版本号")
