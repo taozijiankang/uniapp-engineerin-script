@@ -68,6 +68,8 @@ async function iterationVersion(options: IterationVersionOptions) {
 
   console.log(`${packageJson.name} 的版本号从 ${remoteVersion} 迭代为 ${newVersion}`);
 
+  return;
+
   packageJson.version = newVersion;
 
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n");
