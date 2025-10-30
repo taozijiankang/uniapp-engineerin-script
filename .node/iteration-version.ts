@@ -34,6 +34,8 @@ program
 async function iterationVersion(options: IterationVersionOptions) {
   const { major = "1", minor = "0" } = options;
 
+  console.log(`主版本：${major}，次版本：${minor}`);
+
   const remoteVersion = await new Promise<string>((resolve, reject) => {
     exec(`npm view ${packageJson.name} version`, (error, stdout, stderr) => {
       if (error) {
