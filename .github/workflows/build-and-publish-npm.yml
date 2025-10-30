@@ -8,6 +8,10 @@ on:
     branches:
       - master
 
+permissions:
+  id-token: write # Required for OIDC
+  contents: read
+
 jobs:
   build-and-publish-npm:
     runs-on: ubuntu-22.04
