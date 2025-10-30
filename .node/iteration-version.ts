@@ -32,6 +32,9 @@ program
   .parse(process.argv);
 
 async function iterationVersion(options: IterationVersionOptions) {
+
+  console.log(options);
+
   let { major = "1", minor = "0" } = options;
 
   console.log(`主版本：${major}，次版本：${minor}`);
