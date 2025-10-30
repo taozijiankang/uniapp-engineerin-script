@@ -1,13 +1,14 @@
 # This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
 # For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
 
-name: Publish Package to npmjs
+name: 自动构建并发布包到 npm
 
 on:
   push:
     branches:
       - master
 
+# 权限配置
 permissions:
   id-token: write # Required for OIDC
   contents: write
@@ -20,24 +21,31 @@ jobs:
         node-version: [20]
     steps:
       - uses: actions/checkout@v4
+
       - name: 安装 pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
-      - name: 使用 Nnode.js ${{ matrix.node-version }}
+
+      - name: 使用 Node.js ${{ matrix.node-version }} 版本
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "pnpm"
+
       - name: Update npm
         run: npm install -g npm@latest
+
       - name: 安装依赖
         run: pnpm install
+
       - name: 构建
         run: pnpm run build
+
       - name: 迭代版本号
         run: node ./dist_node/iteration-version.js -t patch
-      - name: 发布
+
+      - name: 发布包到 npm
         run: pnpm publish -r --access public --no-git-checks
 
       - name: Read version from package.json
