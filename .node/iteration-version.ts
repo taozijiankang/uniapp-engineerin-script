@@ -11,10 +11,9 @@ const packageJsonPath = path.join(__dirname, "../package.json");
 
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath).toString());
 
-/**
- * @typedef {Object} IterationVersionOptions
- * @property {'major' | 'minor' | 'patch'} [type] 版本号类型
- */
+interface IterationVersionOptions {
+  type?: "major" | "minor" | "patch";
+}
 
 program
   .version(packageJson.version)
@@ -25,13 +24,10 @@ program
   })
   .parse(process.argv);
 
-/**
- * @param {IterationVersionOptions} options
- */
-async function iterationVersion(options) {
-  const { type = "patch" } = options;
+async function iterationVersion(options: IterationVersionOptions) {
+  const { type } = options;
 
-  const remoteVersion = await new Promise((resolve, reject) => {
+  const remoteVersion = await new Promise<string>((resolve, reject) => {
     exec(`npm view ${packageJson.name} version`, (error, stdout, stderr) => {
       if (error) {
         reject(error);
@@ -42,7 +38,7 @@ async function iterationVersion(options) {
     return "1.0.0";
   });
 
-  const [major, minor, patch] = remoteVersion.split(".");
+  const [major = "1", minor = "0", patch = "0"] = remoteVersion.split(".");
 
   let newVersion = "";
   switch (type) {

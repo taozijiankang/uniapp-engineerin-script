@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./.node",
+    "outDir": "./dist_node",
+    "declarationDir": "./dist_node"
+  },
+  "include": ["./.node/**/*"]
+}
