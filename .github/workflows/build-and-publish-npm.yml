@@ -31,8 +31,6 @@ jobs:
         run: pnpm run build
       - name: 迭代版本号
         run: node ./dist_node/iteration-version.js -t patch
-      - name: 配置 npm 令牌
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - name: 发布
         run: pnpm publish -r --access public --no-git-checks
 
