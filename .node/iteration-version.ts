@@ -34,42 +34,41 @@ program
 async function iterationVersion(options: IterationVersionOptions) {
   let { major = "1", minor = "0" } = options;
 
-  console.log(`主版本：${major}，次版本：${minor}`);
-
   major = parseInt(major.trim()).toString();
   minor = parseInt(minor.trim()).toString();
 
-  const remoteVersion = await new Promise<string>((resolve, reject) => {
-    exec(`npm view ${packageJson.name} version`, (error, stdout, stderr) => {
+  const remoteVersions = await getRemoteVersions();
+
+  const remoteMaxVersion = semver.maxSatisfying(remoteVersions, `*`)!;
+
+  console.log("remoteMaxVersion:", remoteMaxVersion);
+
+  if (semver.lt(`${major}.${Number(minor) + 1}.0`, remoteMaxVersion)) {
+    throw new Error(`主版本号 ${major} 和次版本号 ${minor} 落后于远程最高版本号 ${remoteMaxVersion}`);
+  }
+
+  const newVersion = semver.inc(semver.maxSatisfying([remoteMaxVersion, `${major}.${minor}.0`], `*`)!, "patch")!;
+
+  console.log(`npm 包 ${packageJson.name} 的版本号迭代为 ${newVersion}`);
+
+  packageJson.version = newVersion;
+
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n");
+}
+
+async function getRemoteVersions() {
+  return await new Promise<string>((resolve, reject) => {
+    exec(`npm view ${packageJson.name} versions`, (error, stdout, stderr) => {
       if (error) {
         reject(error);
       }
       resolve(stdout.trim());
     });
-  }).catch((error) => {
-    return "1.0.0";
-  });
-
-  let remotePatch = semver.patch(remoteVersion);
-
-  /**
-   * 当小版本号相同时
-   * 比较主版本号和次版本号
-   * 如果整体大于远程版本号，则重置修订版本号为 0
-   * 如果整体小于远程版本号，则抛出错误
-   */
-  const compareResult = semver.compare(`${major}.${minor}.${remotePatch}`, remoteVersion);
-  if (compareResult === 1) {
-    remotePatch = 0;
-  } else if (compareResult === -1) {
-    throw new Error(`新版本号 ${major}.${minor}.${remotePatch} 落后于 ${packageJson.name} 的当前版本号 ${remoteVersion}`);
-  }
-
-  let newVersion = `${major}.${minor}.${remotePatch + 1}`;
-
-  console.log(`${packageJson.name} 的版本号从 ${remoteVersion} 迭代为 ${newVersion}`);
-
-  packageJson.version = newVersion;
-
-  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + "\n");
+  })
+    .then((versions) => {
+      return JSON.parse(versions.replace(/'/g, '"')) as string[];
+    })
+    .catch((error) => {
+      return ["1.0.0"];
+    });
 }
