@@ -23,15 +23,15 @@
     "build-w": "tsc -b -w"
   },
   "devDependencies": {
-    "@types/fs-extra": "^11.0.4",
-    "@types/inquirer": "^9.0.8",
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.9.2",
-    "@types/semver": "^7.7.1",
-    "@types/unzipper": "^0.10.11",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.8",
+    "@types/semver": "^7.7.1",
+    "@types/js-yaml": "^4.0.9",
+    "@types/unzipper": "^0.10.11",
     "chalk": "^4.1.2",
     "commander": "^12.1.0",
     "dayjs": "^1.11.10",
