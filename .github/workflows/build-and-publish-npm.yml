@@ -11,7 +11,7 @@ on:
 # 权限配置
 permissions:
   id-token: write # Required for OIDC
-  contents: write
+  contents: write # 允许仓库内容修改，用于创建 标签和版本
 
 jobs:
   build-and-publish-npm:
