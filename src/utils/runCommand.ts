@@ -7,7 +7,11 @@ import { spawn } from "child_process";
  */
 export function runCommand(
   command: string,
-  { cwd = "", env = {}, handleStdout }: { cwd?: string; env?: Record<string, string>; handleStdout?: (d: string) => void } = {}
+  {
+    cwd = "",
+    env = {},
+    handleStdout,
+  }: { cwd?: string; env?: Record<string, string>; handleStdout?: (d: string | Buffer) => void } = {}
 ) {
   /** @type {Promise<number | null>} */
   const p = new Promise((resolve) => {

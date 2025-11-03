@@ -97,20 +97,17 @@ export interface AppConfig<AppEnv extends any = any> {
     /** 环境配置 */
     value: AppEnv;
   }[];
-  /** 发布配置，用于批量发布小程序 */
-  release?: {
-    /** 发布类型，体验版 | 正式版本 */
-    type: MPVersionTypeValue;
-    /** 使用环境 */
-    env: EnvName;
-  }[];
 }
 
 export interface AppConfigExtend extends AppConfig {
   /** app 索引 */
   index: number;
+  /** app 唯一标识 */
+  key: string;
   /** app 包名 全局唯一 */
   packageName: string;
   /** app 路径 全局唯一 */
   path: string;
+  /** app 标识颜色 */
+  signColor: string;
 }

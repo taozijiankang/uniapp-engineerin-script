@@ -18,6 +18,7 @@ import {
   UpdateVersionNumTypeDicts,
   AppVersionType,
   AppVersionTypeDicts,
+  ConfirmTypeDicts,
 } from "../constants/index.js";
 import { packageJson } from "../packageJson.js";
 import { createLog } from "../utils/createLog.js";
@@ -27,6 +28,7 @@ import { getConfig } from "../config/index.js";
 import { getApps } from "../appManage/getApps.js";
 import { cleanupTempHashFolders } from "../utils/cleanupTempFolders.js";
 import { createApps } from "../appManage/createApps.js";
+import { EnvName } from "../types/config.js";
 
 // 注册自定义 prompt（必须）
 inquirer.registerPrompt("checkbox-plus", CheckboxPlus);
@@ -121,6 +123,60 @@ async function release(args: ReleaseOptions) {
       return;
     }
 
+    const { appVersionTypes }: { appVersionTypes: AppVersionType[] } = await inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "appVersionTypes",
+        message: "请选择版本类型：",
+        choices: AppVersionTypeDicts.map((item) => ({
+          value: item.value,
+          name: item.label,
+        })),
+      },
+    ]);
+
+    if (appVersionTypes.length <= 0) {
+      console.log(chalk.bgHex(FailColor)(`未选择要发布的版本类型`));
+      return;
+    }
+
+    const { envs }: { envs: EnvName[] } = await inquirer.prompt([
+      {
+        type: "checkbox",
+        name: "envs",
+        message: "请选择环境：",
+        choices: [
+          ...new Set(
+            appsConfig
+              .filter((item) => appPackageNames.some((packageName) => packageName === item.packageName))
+              .map((item) => item.envs || [])
+              .flat()
+              .map((item) => item.name)
+          ),
+        ]
+          .filter((item) => {
+            // 不允许发布开发环境
+            if (item === "development") {
+              return false;
+            }
+            // 正式环境只能发布正式版本
+            if (appVersionTypes.length === 1 && appVersionTypes[0] === AppVersionType.RELEASE) {
+              return item === "production";
+            }
+            return true;
+          })
+          .map((item) => ({
+            value: item,
+            name: item,
+          })),
+      },
+    ]);
+
+    if (envs.length <= 0) {
+      console.log(chalk.bgHex(FailColor)(`未选择要发布的环境`));
+      return;
+    }
+
     const { updateVersionNumType }: { updateVersionNumType: UpdateVersionNumType } = await inquirer.prompt([
       {
         type: "list",
@@ -152,14 +208,25 @@ async function release(args: ReleaseOptions) {
         console.error(`未找到项目: ${appPackageName}`);
         continue;
       }
-      releaseApps.push(
-        ...(appConfig.release?.map((item) => ({
-          packageName: appPackageName,
-          env: item.env,
-          appVersionType: item.type as AppVersionType,
-          updateVersionNumType: updateVersionNumType,
-        })) || [])
-      );
+      for (const appVersionType of appVersionTypes) {
+        for (const env of envs) {
+          if (!appConfig.envs?.some((item) => item.name === env)) {
+            continue;
+          }
+          // 正式环境固定为正式版本
+          if (appVersionType === AppVersionType.RELEASE) {
+            if (env !== "production") {
+              continue;
+            }
+          }
+          releaseApps.push({
+            packageName: appPackageName,
+            env,
+            appVersionType,
+            updateVersionNumType,
+          });
+        }
+      }
     }
   } else {
     console.log("创建app项目");
@@ -180,12 +247,50 @@ async function release(args: ReleaseOptions) {
     return;
   }
 
+  const releaseAppPackageNames = [...new Set(releaseApps.map((item) => item.packageName))];
+
+  // 确认一下发布信息
+  console.log(chalk.yellow("\n此次发布内容:"));
+  for (const appPackageName of releaseAppPackageNames) {
+    const appConfig = appsConfig.find((app) => app.packageName === appPackageName);
+    if (!appConfig) {
+      continue;
+    }
+    console.log(chalk.hex(appConfig.signColor)(`${appConfig.description} [${appConfig.key}]:`));
+    console.log(
+      releaseApps
+        .filter((item) => item.packageName === appPackageName)
+        .map(
+          (item) =>
+            `${AppVersionTypeDicts.find((type) => type.value === item.appVersionType)?.label}-${
+              appConfig.envs?.find((env) => env.name === item.env)?.description || item.env
+            }-${UpdateVersionNumTypeDicts.find((type) => type.value === item.updateVersionNumType)?.label}`
+        )
+        .join(",,,")
+    );
+  }
+
+  const { confirm }: { confirm: ConfirmType } = await inquirer.prompt([
+    {
+      type: "list",
+      name: "confirm",
+      message: "是否确认发布?",
+      default: ConfirmType.NO,
+      choices: ConfirmTypeDicts.map((item) => ({
+        value: item.value,
+        name: item.label,
+      })),
+    },
+  ]);
+  if (confirm === ConfirmType.NO) {
+    console.log(chalk.bgHex(FailColor)(`已取消发布`));
+    return;
+  }
+
   console.log("安装app项目依赖");
   await runCommand("pnpm i", {
     cwd: config.dirs.appsContainerDir,
   });
-
-  const log = createLog();
 
   const runTask = async ({
     logFileName,
@@ -202,37 +307,32 @@ async function release(args: ReleaseOptions) {
   }) => {
     const logContents = ["", `## ${title}`, "", `### 命令: ${command}`, "", `### 日期: ${new Date().toLocaleString()}`, ""];
     let commandLog = "";
+    const log = createLog({ title, titleBgColor: color });
     const code = await runCommand(command, {
       cwd,
       handleStdout: (data) => {
-        log(data, title, color);
+        log(data.toString());
         commandLog += data;
       },
     });
     const success = code == 0;
-    const mes =
-      chalk.bgHex(color)(" ") + " " + chalk.bgHex(success ? SuccessColor : FailColor)(`[${title}] ${success ? "成功" : "失败"}`);
-    console.log(mes, "\n");
+    const resultMessage = `${chalk.hex(color)(title)} ${
+      success ? chalk.bgHex(SuccessColor)("✅成功") : chalk.bgHex(FailColor)("❌失败")
+    }`;
+    log(resultMessage);
+
     logContents.push(`### 结果: ${success ? "✅成功" : "❌失败"}`, "");
     logContents.push(`\`\`\`log\n${commandLog}\n\`\`\``);
     fs.writeFileSync(path.join(logDir, `${logFileName}-release-log.md`), logContents.join("\n"), {
       flag: "a",
     });
     return {
-      mes,
+      resultMessage,
       success,
     };
   };
 
-  const releaseAppPackageNames = [...new Set(releaseApps.map((item) => item.packageName))];
-
-  console.log(
-    "\n",
-    chalk.bgHex(SuccessColor)(`已选择[${releaseAppPackageNames.length}个App] [${releaseApps.length}个发布版本]`),
-    "\n"
-  );
-
-  const releaseResults: ({ mes: string; success: boolean } & ReleaseApp)[] = [];
+  const releaseResults: ({ resultMessage: string; success: boolean } & ReleaseApp)[] = [];
   for (const groupsAppPackageName of chunkArray(releaseAppPackageNames, config.appSyncHandleNumber)) {
     await Promise.all(
       groupsAppPackageName.map(async (appPackageName) => {
@@ -250,7 +350,7 @@ async function release(args: ReleaseOptions) {
             appVersionType,
             updateVersionNumType,
             ...(await runTask({
-              logFileName: `${appConfig.type}-${appConfig.name}`,
+              logFileName: appConfig.key,
               command: [
                 `node ${path.join(__dirname, "app-start.js")}`,
                 `-p ${appPackageName}`,
@@ -261,10 +361,8 @@ async function release(args: ReleaseOptions) {
                 `-t ${updateVersionNumType}`,
                 `-c ${ConfirmType.NO}`,
               ].join(" "),
-              title: `发布App[${appConfig.index}]: ${appConfig.description || appConfig.name} 环境: ${
-                appConfig.envs?.find((item) => item.name === env)?.description || env
-              } 版本: ${AppVersionTypeDicts.find((item) => item.value === appVersionType)?.label || appVersionType}`,
-              color: Colors[appConfig.index] || "#f9ed69",
+              title: `[${appConfig.index}]:${appConfig.key}#${env}-${appVersionType}-${updateVersionNumType}`,
+              color: appConfig.signColor,
               cwd: config.dirs.rootDir,
             })),
           });
@@ -281,21 +379,21 @@ async function release(args: ReleaseOptions) {
   const failResults = releaseResults.filter((item) => !item.success);
 
   if (successResults.length > 0) {
-    console.log(chalk.bgHex(SuccessColor)(`[${successResults.length}个App 发布成功]`));
+    console.log(chalk.bgHex(SuccessColor)(`[${successResults.length}个任务执行成功]`));
     successResults.forEach((item) => {
-      console.log(item.mes);
+      console.log(item.resultMessage);
     });
   }
 
   if (failResults.length > 0) {
-    console.log(chalk.bgHex(FailColor)(`[${failResults.length}个App 发布失败]`));
+    console.log(chalk.bgHex(FailColor)(`[${failResults.length}个任务执行失败]`));
     failResults.forEach((item) => {
-      console.log(item.mes);
+      console.log(item.resultMessage);
     });
 
     console.log(
       "\n",
-      chalk.yellow("根目录下运行命令重新发布本次发布失败的项目: "),
+      chalk.yellow("根目录下运行命令重新执行本次执行失败的任务: "),
       "\n",
       chalk.green(
         `pnpm run release -s "${failResults
