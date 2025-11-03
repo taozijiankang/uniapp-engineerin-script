@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { AppConfigExtend, ProjectConfigExtend } from "../types/config.js";
+import { Colors } from "../constants/color.js";
 
 export function getApps(config: ProjectConfigExtend) {
   /** @type {ProjectPackageJson} */
@@ -13,6 +14,7 @@ export function getApps(config: ProjectConfigExtend) {
       key: `${item.type}-${item.name}`,
       packageName: `@${projectPackage.name}-${item.type}-app/${item.name}`,
       path: path.join(config.dirs.appsDir, item.type, item.name),
+      signColor: Colors[index] || "#f9ed69",
     };
     return res;
   });
