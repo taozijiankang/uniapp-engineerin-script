@@ -8,8 +8,6 @@ import { UpdateVersionNumType } from "../constants/enum.js";
 import { getUpdateVersionNum } from "./getUpdateVersionNum.js";
 import type { CIProject } from "miniprogram-ci";
 import { getRootDir } from "../pathManage.js";
-import unzipper from "unzipper";
-import miniprogramCi from "miniprogram-ci";
 
 export async function uploadMp(options: {
   appConfig: AppConfigExtend;
@@ -22,6 +20,8 @@ export async function uploadMp(options: {
   const { appConfig, appVersionType, env, updateVersionNumType, appid, privateKey } = options;
 
   const weixinMPBuildPath = path.join(appConfig.path, "dist/build/mp-weixin");
+
+  const { default: miniprogramCi } = await import("miniprogram-ci");
 
   const project = new miniprogramCi.Project({
     appid,
@@ -77,6 +77,9 @@ export async function uploadMp(options: {
 }
 
 async function getAppLatestVersion(project: CIProject, robotNumber: number) {
+  const { default: miniprogramCi } = await import("miniprogram-ci");
+  const { default: unzipper } = await import("unzipper");
+
   const appid = project.appid;
 
   const sourceMapSavePath = `${getRootDir()}/node_modules/.app-sm-cache/app-${appid}-robot-${robotNumber}-sm.zip`;

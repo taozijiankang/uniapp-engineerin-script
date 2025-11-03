@@ -48,7 +48,7 @@ export const ConfirmTypeDicts = [
 export const UpdateVersionNumTypeDicts = [
   {
     value: UpdateVersionNumType.NONE,
-    label: "不更新",
+    label: "不更新版本",
   },
   {
     value: UpdateVersionNumType.PATCH,
