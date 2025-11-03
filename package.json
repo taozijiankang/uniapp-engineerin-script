@@ -1,6 +1,7 @@
 {
   "name": "taozi-uniapp-engineering-script",
   "version": "1.0.0",
+  "description": "桃子科技 uniapp 工程化脚本",
   "type": "module",
   "license": "MIT",
   "bin": {

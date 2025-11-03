@@ -9,6 +9,7 @@ import { getUpdateVersionNum } from "./getUpdateVersionNum.js";
 import type { CIProject } from "miniprogram-ci";
 import { getRootDir } from "../pathManage.js";
 import unzipper from "unzipper";
+import miniprogramCi from "miniprogram-ci";
 
 export async function uploadMp(options: {
   appConfig: AppConfigExtend;
@@ -22,9 +23,7 @@ export async function uploadMp(options: {
 
   const weixinMPBuildPath = path.join(appConfig.path, "dist/build/mp-weixin");
 
-  const ci = (await import("miniprogram-ci")).default;
-
-  const project = new ci.Project({
+  const project = new miniprogramCi.Project({
     appid,
     type: "miniProgram",
     projectPath: weixinMPBuildPath,
@@ -57,7 +56,7 @@ export async function uploadMp(options: {
     });
 
   const upload = async () => {
-    const uploadResult = await ci.upload({
+    const uploadResult = await miniprogramCi.upload({
       project,
       version: getUpdateVersionNum(latestVersion, updateVersionNumType),
       desc,
@@ -78,8 +77,6 @@ export async function uploadMp(options: {
 }
 
 async function getAppLatestVersion(project: CIProject, robotNumber: number) {
-  const ci = (await import("miniprogram-ci")).default;
-
   const appid = project.appid;
 
   const sourceMapSavePath = `${getRootDir()}/node_modules/.app-sm-cache/app-${appid}-robot-${robotNumber}-sm.zip`;
@@ -88,7 +85,7 @@ async function getAppLatestVersion(project: CIProject, robotNumber: number) {
     fs.mkdirSync(path.dirname(sourceMapSavePath), { recursive: true });
   }
 
-  await ci.getDevSourceMap({
+  await miniprogramCi.getDevSourceMap({
     project,
     robot: robotNumber,
     sourceMapSavePath,
