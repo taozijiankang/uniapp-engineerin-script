@@ -63,13 +63,6 @@ export interface ProjectConfigExtend extends ProjectConfig {
 export type AppType = "cloud-outpatient" | "internet-hospital";
 
 /**
- * 发布类型
- * trial 体验版
- * release 正式版本
- */
-export type MPVersionTypeValue = "trial" | "release";
-
-/**
  * 环境名称
  * production 生产环境
  * development 开发环境
