@@ -185,8 +185,6 @@ async function release(args: ReleaseOptions) {
     cwd: config.dirs.appsContainerDir,
   });
 
-  const log = createLog();
-
   const runTask = async ({
     logFileName,
     command,
@@ -202,24 +200,27 @@ async function release(args: ReleaseOptions) {
   }) => {
     const logContents = ["", `## ${title}`, "", `### 命令: ${command}`, "", `### 日期: ${new Date().toLocaleString()}`, ""];
     let commandLog = "";
+    const log = createLog({ title, titleBgColor: color });
     const code = await runCommand(command, {
       cwd,
       handleStdout: (data) => {
-        log(data, title, color);
+        log(data.toString());
         commandLog += data;
       },
     });
     const success = code == 0;
-    const mes =
-      chalk.bgHex(color)(" ") + " " + chalk.bgHex(success ? SuccessColor : FailColor)(`[${title}] ${success ? "成功" : "失败"}`);
-    console.log(mes, "\n");
+    const resultMessage = `${chalk.hex(color)(title)} ${
+      success ? chalk.bgHex(SuccessColor)("✅成功") : chalk.bgHex(FailColor)("❌失败")
+    }`;
+    log(resultMessage);
+
     logContents.push(`### 结果: ${success ? "✅成功" : "❌失败"}`, "");
     logContents.push(`\`\`\`log\n${commandLog}\n\`\`\``);
     fs.writeFileSync(path.join(logDir, `${logFileName}-release-log.md`), logContents.join("\n"), {
       flag: "a",
     });
     return {
-      mes,
+      resultMessage,
       success,
     };
   };
@@ -232,7 +233,7 @@ async function release(args: ReleaseOptions) {
     "\n"
   );
 
-  const releaseResults: ({ mes: string; success: boolean } & ReleaseApp)[] = [];
+  const releaseResults: ({ resultMessage: string; success: boolean } & ReleaseApp)[] = [];
   for (const groupsAppPackageName of chunkArray(releaseAppPackageNames, config.appSyncHandleNumber)) {
     await Promise.all(
       groupsAppPackageName.map(async (appPackageName) => {
@@ -261,9 +262,7 @@ async function release(args: ReleaseOptions) {
                 `-t ${updateVersionNumType}`,
                 `-c ${ConfirmType.NO}`,
               ].join(" "),
-              title: `发布App[${appConfig.index}]: ${appConfig.description || appConfig.name} 环境: ${
-                appConfig.envs?.find((item) => item.name === env)?.description || env
-              } 版本: ${AppVersionTypeDicts.find((item) => item.value === appVersionType)?.label || appVersionType}`,
+              title: `[${appConfig.index}]:${appConfig.type}/${appConfig.name}#${env}-${appVersionType}-${updateVersionNumType}`,
               color: Colors[appConfig.index] || "#f9ed69",
               cwd: config.dirs.rootDir,
             })),
@@ -283,14 +282,14 @@ async function release(args: ReleaseOptions) {
   if (successResults.length > 0) {
     console.log(chalk.bgHex(SuccessColor)(`[${successResults.length}个App 发布成功]`));
     successResults.forEach((item) => {
-      console.log(item.mes);
+      console.log(item.resultMessage);
     });
   }
 
   if (failResults.length > 0) {
     console.log(chalk.bgHex(FailColor)(`[${failResults.length}个App 发布失败]`));
     failResults.forEach((item) => {
-      console.log(item.mes);
+      console.log(item.resultMessage);
     });
 
     console.log(
