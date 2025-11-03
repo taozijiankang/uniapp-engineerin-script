@@ -251,7 +251,7 @@ async function release(args: ReleaseOptions) {
             appVersionType,
             updateVersionNumType,
             ...(await runTask({
-              logFileName: `${appConfig.type}-${appConfig.name}`,
+              logFileName: appConfig.key,
               command: [
                 `node ${path.join(__dirname, "app-start.js")}`,
                 `-p ${appPackageName}`,
@@ -262,7 +262,7 @@ async function release(args: ReleaseOptions) {
                 `-t ${updateVersionNumType}`,
                 `-c ${ConfirmType.NO}`,
               ].join(" "),
-              title: `[${appConfig.index}]:${appConfig.type}/${appConfig.name}#${env}-${appVersionType}-${updateVersionNumType}`,
+              title: `[${appConfig.index}]:${appConfig.key}#${env}-${appVersionType}-${updateVersionNumType}`,
               color: Colors[appConfig.index] || "#f9ed69",
               cwd: config.dirs.rootDir,
             })),

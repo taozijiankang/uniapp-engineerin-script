@@ -109,6 +109,8 @@ export interface AppConfig<AppEnv extends any = any> {
 export interface AppConfigExtend extends AppConfig {
   /** app 索引 */
   index: number;
+  /** app 唯一标识 */
+  key: string;
   /** app 包名 全局唯一 */
   packageName: string;
   /** app 路径 全局唯一 */

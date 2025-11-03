@@ -10,6 +10,7 @@ export function getApps(config: ProjectConfigExtend) {
     const res: AppConfigExtend = {
       ...item,
       index,
+      key: `${item.type}-${item.name}`,
       packageName: `@${projectPackage.name}-${item.type}-app/${item.name}`,
       path: path.join(config.dirs.appsDir, item.type, item.name),
     };
