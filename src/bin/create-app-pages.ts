@@ -13,6 +13,8 @@ async function createAppPages() {
 
   const currentCWDDir = process.cwd();
 
+  console.log(chalk.yellow(`开始创建页面[app]\ncwd: ${currentCWDDir}`));
+
   const pagesTsPath = path.join(currentCWDDir, "./src/pages.ts");
 
   if (!fs.statSync(pagesTsPath, { throwIfNoEntry: false })?.isFile()) {
