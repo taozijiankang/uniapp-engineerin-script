@@ -396,7 +396,7 @@ async function release(args: ReleaseOptions) {
       chalk.yellow("根目录下运行命令重新执行本次执行失败的任务: "),
       "\n",
       chalk.green(
-        `pnpm run release -s "${failResults
+        `npx taozi-ues-release -s "${failResults
           .map(({ packageName, env, appVersionType, updateVersionNumType }) => {
             const releaseApp: ReleaseApp = {
               packageName,
