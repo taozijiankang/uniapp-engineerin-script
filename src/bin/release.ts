@@ -190,18 +190,6 @@ async function release(args: ReleaseOptions) {
       },
     ]);
 
-    console.log("创建app项目");
-    await createApps(
-      appsConfig.filter((item) => appPackageNames.some((packageName) => packageName === item.packageName)),
-      {
-        appPackageDir: config.dirs.appPackageDir,
-        appSyncHandleNumber: config.appSyncHandleNumber,
-        appEnvKeyDicts: config.appEnvKeyDicts,
-        distributionApp: config.distributionApp,
-        wxConfig: config.wx,
-      }
-    );
-
     for (const appPackageName of appPackageNames) {
       const appConfig = appsConfig.find((app) => app.packageName === appPackageName);
       if (!appConfig) {
@@ -228,18 +216,6 @@ async function release(args: ReleaseOptions) {
         }
       }
     }
-  } else {
-    console.log("创建app项目");
-    await createApps(
-      appsConfig.filter((item) => releaseApps.some((apps) => apps.packageName === item.packageName)),
-      {
-        appPackageDir: config.dirs.appPackageDir,
-        appSyncHandleNumber: config.appSyncHandleNumber,
-        appEnvKeyDicts: config.appEnvKeyDicts,
-        distributionApp: config.distributionApp,
-        wxConfig: config.wx,
-      }
-    );
   }
 
   if (releaseApps.length <= 0) {
@@ -287,50 +263,22 @@ async function release(args: ReleaseOptions) {
     return;
   }
 
+  console.log("创建app项目");
+  await createApps(
+    appsConfig.filter((item) => releaseAppPackageNames.some((packageName) => packageName === item.packageName)),
+    {
+      appPackageDir: config.dirs.appPackageDir,
+      appSyncHandleNumber: config.appSyncHandleNumber,
+      appEnvKeyDicts: config.appEnvKeyDicts,
+      distributionApp: config.distributionApp,
+      wxConfig: config.wx,
+    }
+  );
+
   console.log("安装app项目依赖");
   await runCommand("pnpm i", {
     cwd: config.dirs.appsContainerDir,
   });
-
-  const runTask = async ({
-    logFileName,
-    command,
-    title,
-    color,
-    cwd,
-  }: {
-    logFileName: string;
-    command: string;
-    title: string;
-    color: string;
-    cwd: string;
-  }) => {
-    const logContents = ["", `## ${title}`, "", `### 命令: ${command}`, "", `### 日期: ${new Date().toLocaleString()}`, ""];
-    let commandLog = "";
-    const log = createLog({ title, titleBgColor: color });
-    const code = await runCommand(command, {
-      cwd,
-      handleStdout: (data) => {
-        log(data.toString());
-        commandLog += data;
-      },
-    });
-    const success = code == 0;
-    const resultMessage = `${chalk.hex(color)(title)} ${
-      success ? chalk.bgHex(SuccessColor)("✅成功") : chalk.bgHex(FailColor)("❌失败")
-    }`;
-    log(resultMessage);
-
-    logContents.push(`### 结果: ${success ? "✅成功" : "❌失败"}`, "");
-    logContents.push(`\`\`\`log\n${commandLog}\n\`\`\``);
-    fs.writeFileSync(path.join(logDir, `${logFileName}-release-log.md`), logContents.join("\n"), {
-      flag: "a",
-    });
-    return {
-      resultMessage,
-      success,
-    };
-  };
 
   const releaseResults: ({ resultMessage: string; success: boolean } & ReleaseApp)[] = [];
   for (const groupsAppPackageName of chunkArray(releaseAppPackageNames, config.appSyncHandleNumber)) {
@@ -350,7 +298,7 @@ async function release(args: ReleaseOptions) {
             appVersionType,
             updateVersionNumType,
             ...(await runTask({
-              logFileName: appConfig.key,
+              logFilePath: path.join(logDir, `${appConfig.key}-release-log.md`),
               command: [
                 `node ${path.join(__dirname, "app-start.js")}`,
                 `-p ${appPackageName}`,
@@ -411,4 +359,44 @@ async function release(args: ReleaseOptions) {
       "\n"
     );
   }
+}
+
+async function runTask({
+  logFilePath,
+  command,
+  title,
+  color,
+  cwd,
+}: {
+  logFilePath: string;
+  command: string;
+  title: string;
+  color: string;
+  cwd: string;
+}) {
+  const logContents = ["", `## ${title}`, "", `### 命令: ${command}`, "", `### 日期: ${new Date().toLocaleString()}`, ""];
+  let commandLog = "";
+  const log = createLog({ title, titleBgColor: color });
+  const code = await runCommand(command, {
+    cwd,
+    handleStdout: (data) => {
+      log(data.toString());
+      commandLog += data;
+    },
+  });
+  const success = code == 0;
+  const resultMessage = `${chalk.hex(color)(title)} ${
+    success ? chalk.bgHex(SuccessColor)("✅成功") : chalk.bgHex(FailColor)("❌失败")
+  }`;
+  log(resultMessage);
+
+  logContents.push(`### 结果: ${success ? "✅成功" : "❌失败"}`, "");
+  logContents.push(`\`\`\`log\n${commandLog}\n\`\`\``);
+  fs.writeFileSync(logFilePath, logContents.join("\n"), {
+    flag: "a",
+  });
+  return {
+    resultMessage,
+    success,
+  };
 }

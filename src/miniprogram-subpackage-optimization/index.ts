@@ -38,6 +38,9 @@ export default async function miniprogramSubpackageOptimization(options: IMinipr
     onlyOptimizeMainPackage = false,
   } = options;
   const cwdPath = process.cwd();
+
+  console.log(chalk.blue(`Starting miniprogramSubpackageOptimization for project: ${cwdPath}`));
+
   const projectPath = isAbsolute(projectDistPath) ? projectDistPath : join(cwdPath, projectDistPath);
 
   // 查找 node-modules 目录的位置
