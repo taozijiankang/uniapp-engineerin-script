@@ -2,7 +2,7 @@ import { AppConfigExtend } from "../../types/config.js";
 
 export interface Loader {
   rules: RegExp | { (filePath: string): boolean };
-  handler: string | LoaderHandler;
+  handler: LoaderHandler;
 }
 
 export interface LoaderHandler {

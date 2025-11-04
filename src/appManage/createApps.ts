@@ -5,7 +5,6 @@ import path from "path";
 import { chunkArray, hasDir, hasFile } from "../utils/global.js";
 import { isWindows } from "../utils/is.js";
 import { AppConfigExtend, ProjectConfigExtend } from "../types/config.js";
-import { LoaderHandlerType, usableLoaderHandlers } from "./loader/index.js";
 
 export async function createApps(
   appsConfig: AppConfigExtend[],
@@ -44,11 +43,7 @@ export async function createApps(
             let buffer = await fs.promises.readFile(sourceFilePath);
             for (const loader of distributionApp?.loaders || []) {
               if (typeof loader.rules === "function" ? loader.rules(item) : loader.rules.test(item)) {
-                const handler =
-                  typeof loader.handler === "string" ? usableLoaderHandlers[loader.handler as LoaderHandlerType] : loader.handler;
-                if (handler) {
-                  buffer = Buffer.from(await handler(sourceFilePath, appConfig, buffer));
-                }
+                buffer = Buffer.from(await loader.handler(sourceFilePath, appConfig, buffer));
               }
             }
             await fs.promises.writeFile(targetFilePath, buffer);
