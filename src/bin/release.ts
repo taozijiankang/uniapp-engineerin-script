@@ -71,7 +71,7 @@ async function release(args: ReleaseOptions) {
     fs.mkdirSync(logDir, { recursive: true });
   } catch {}
 
-  const releaseApps: ReleaseApp[] = argsApps
+  let releaseApps: ReleaseApp[] = argsApps
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean)
@@ -225,43 +225,53 @@ async function release(args: ReleaseOptions) {
 
   const releaseAppPackageNames = [...new Set(releaseApps.map((item) => item.packageName))];
 
-  // 确认一下发布信息
-  console.log(chalk.yellow("\n此次发布内容:"));
-  for (const appPackageName of releaseAppPackageNames) {
-    const appConfig = appsConfig.find((app) => app.packageName === appPackageName);
-    if (!appConfig) {
-      continue;
-    }
-    console.log(chalk.hex(appConfig.signColor)(`${appConfig.description} [${appConfig.key}]:`));
-    console.log(
-      releaseApps
-        .filter((item) => item.packageName === appPackageName)
-        .map(
-          (item) =>
-            `${AppVersionTypeDicts.find((type) => type.value === item.appVersionType)?.label}-${
-              appConfig.envs?.find((env) => env.name === item.env)?.description || item.env
-            }-${UpdateVersionNumTypeDicts.find((type) => type.value === item.updateVersionNumType)?.label}`
-        )
-        .join(",,,")
-    );
-  }
+  const confirmReleaseAppsOptions = releaseApps
+    .map((item, index) => {
+      const appConfig = appsConfig.find((app) => app.packageName === item.packageName);
+      if (!appConfig) {
+        return null;
+      }
+      return {
+        name: `${appConfig.description || appConfig.name} [${appConfig.key}]: ${
+          AppVersionTypeDicts.find((type) => type.value === item.appVersionType)?.label
+        }-${appConfig.envs?.find((env) => env.name === item.env)?.description || item.env}-${
+          UpdateVersionNumTypeDicts.find((type) => type.value === item.updateVersionNumType)?.label
+        }`,
+        value: index,
+        item,
+      };
+    })
+    .filter(Boolean);
 
-  const { confirm }: { confirm: ConfirmType } = await inquirer.prompt([
+  const { confirmReleaseApps }: { confirmReleaseApps: number[] } = await inquirer.prompt([
     {
-      type: "list",
-      name: "confirm",
-      message: "是否确认发布?",
-      default: ConfirmType.NO,
-      choices: ConfirmTypeDicts.map((item) => ({
-        value: item.value,
-        name: item.label,
-      })),
+      type: "checkbox-plus",
+      name: "confirmReleaseApps",
+      highlight: true,
+      searchable: true,
+      pageSize: 20,
+      default: confirmReleaseAppsOptions.map((item) => item?.value),
+      message: `确认发布内容(${confirmReleaseAppsOptions.length})：`,
+      source: async (_: any, input: string) => {
+        input = (input || "").trim();
+        return fuzzy
+          .filter(input, confirmReleaseAppsOptions, {
+            extract: (item) => item?.name || "",
+          })
+          .map((item) => item.original);
+      },
     },
   ]);
-  if (confirm === ConfirmType.NO) {
-    console.log(chalk.bgHex(FailColor)(`已取消发布`));
+
+  if (confirmReleaseApps.length <= 0) {
+    console.log(chalk.bgHex(FailColor)(`未选择要发布的App`));
     return;
   }
+
+  releaseApps = confirmReleaseAppsOptions
+    .filter((item) => confirmReleaseApps.some((index) => index === item?.value))
+    .map((item) => item?.item as ReleaseApp)
+    .filter(Boolean);
 
   console.log("创建app项目");
   await createApps(
