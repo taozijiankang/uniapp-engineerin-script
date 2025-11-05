@@ -5,9 +5,9 @@ import { AppVersionType, AppVersionTypeDicts } from "../constants/index.js";
 import { getGitInfo } from "./getGitInfo.js";
 import { AppConfigExtend } from "../types/config.js";
 import { UpdateVersionNumType } from "../constants/enum.js";
-import { getUpdateVersionNum } from "./getUpdateVersionNum.js";
 import type { CIProject } from "miniprogram-ci";
 import { getRootDir } from "../pathManage.js";
+import semver from "semver";
 
 export async function uploadMp(options: {
   appConfig: AppConfigExtend;
@@ -30,14 +30,6 @@ export async function uploadMp(options: {
     privateKey,
   });
 
-  const desc = `[${appConfig.description || appConfig.name}] 版本类型: [${
-    AppVersionTypeDicts.find((item) => item.value === appVersionType)?.label || appVersionType
-  }] 环境: [${appConfig.envs?.find((item) => item.name === env)?.description || env}] 提交信息: [${(
-    await getGitInfo({
-      cwd: appConfig.path,
-    })
-  ).trim()}]`;
-
   const robotNumber = Number(
     `${appVersionType === AppVersionType.RELEASE ? 1 : 2}${appConfig.envs?.find((item) => item.name === env)?.ciRobot || 0}`
   );
@@ -55,10 +47,44 @@ export async function uploadMp(options: {
       return version;
     });
 
+  const releaseType =
+    updateVersionNumType === UpdateVersionNumType.MAJOR
+      ? "major"
+      : updateVersionNumType === UpdateVersionNumType.MINOR
+      ? "minor"
+      : updateVersionNumType === UpdateVersionNumType.PATCH
+      ? "patch"
+      : undefined;
+
+  const newVersion = releaseType ? semver.inc(latestVersion, releaseType) : latestVersion;
+
+  const desc = [
+    {
+      label: "应用名称",
+      value: appConfig.description || appConfig.name,
+    },
+    {
+      label: "版本类型",
+      value: AppVersionTypeDicts.find((item) => item.value === appVersionType)?.label || appVersionType,
+    },
+    {
+      label: "环境",
+      value: appConfig.envs?.find((item) => item.name === env)?.description || env,
+    },
+    {
+      label: "提交信息",
+      value: await getGitInfo({
+        cwd: appConfig.path,
+      }),
+    },
+  ]
+    .map((item) => `[${item.label}: ${item.value}]`)
+    .join(" ");
+
   const upload = async () => {
     const uploadResult = await miniprogramCi.upload({
       project,
-      version: getUpdateVersionNum(latestVersion, updateVersionNumType),
+      version: newVersion,
       desc,
       robot: robotNumber,
       onProgressUpdate: () => {
@@ -66,7 +92,7 @@ export async function uploadMp(options: {
       },
     });
     console.log(uploadResult);
-    console.log(`${desc} 上传成功`);
+    console.log(`${desc} 版本号: ${newVersion} 上传成功`);
   };
   // 重试3次
   let p = Promise.resolve(upload());
