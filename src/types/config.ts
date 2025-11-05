@@ -17,8 +17,9 @@ export interface ProjectConfig {
     /** 加载器 */
     loaders?: Loader[];
   };
-  runsScripts?: {
-    /** 命令 key */
+  /** 运行命令列表 */
+  runsCommands?: {
+    /** 命令 */
     command: string;
     /** 命令描述 */
     description: string;
