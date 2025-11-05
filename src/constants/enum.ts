@@ -12,13 +12,6 @@ export enum AppStartMode {
   BUILD = "build",
 }
 
-export enum AppVersionType {
-  /** 体验版本 */
-  TRIAL = "trial",
-  /** 正式版本 */
-  RELEASE = "release",
-}
-
 export enum ConfirmType {
   /** 是 */
   YES = "yes",

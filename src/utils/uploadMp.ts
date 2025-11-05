@@ -1,7 +1,6 @@
 import path from "path";
 import fs from "fs";
 
-import { AppVersionType, AppVersionTypeDicts } from "../constants/index.js";
 import { getGitInfo } from "./getGitInfo.js";
 import { AppConfigExtend } from "../types/config.js";
 import { UpdateVersionNumType } from "../constants/enum.js";
@@ -11,13 +10,12 @@ import semver from "semver";
 
 export async function uploadMp(options: {
   appConfig: AppConfigExtend;
-  appVersionType: AppVersionType;
   env: string;
   updateVersionNumType: UpdateVersionNumType;
   appid: string;
   privateKey: string;
 }) {
-  const { appConfig, appVersionType, env, updateVersionNumType, appid, privateKey } = options;
+  const { appConfig, env, updateVersionNumType, appid, privateKey } = options;
 
   const weixinMPBuildPath = path.join(appConfig.path, "dist/build/mp-weixin");
 
@@ -30,9 +28,7 @@ export async function uploadMp(options: {
     privateKey,
   });
 
-  const robotNumber = Number(
-    `${appVersionType === AppVersionType.RELEASE ? 1 : 2}${appConfig.envs?.find((item) => item.name === env)?.ciRobot || 0}`
-  );
+  const robotNumber = appConfig.envs?.find((item) => item.name === env)?.ciRobot || 0;
 
   console.log(`获取小程序 ${appConfig.description || appConfig.name} 机器人 ${robotNumber} 最新版本...`);
   const latestVersion = await getAppLatestVersion(project, robotNumber)
@@ -62,10 +58,6 @@ export async function uploadMp(options: {
     {
       label: "应用名称",
       value: appConfig.description || appConfig.name,
-    },
-    {
-      label: "版本类型",
-      value: AppVersionTypeDicts.find((item) => item.value === appVersionType)?.label || appVersionType,
     },
     {
       label: "环境",

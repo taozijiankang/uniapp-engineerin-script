@@ -10,16 +10,8 @@ import CheckboxPlus from "inquirer-checkbox-plus-prompt";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { Colors, FailColor, SuccessColor } from "../constants/color.js";
-import {
-  AppStartMode,
-  ConfirmType,
-  UpdateVersionNumType,
-  UpdateVersionNumTypeDicts,
-  AppVersionType,
-  AppVersionTypeDicts,
-  ConfirmTypeDicts,
-} from "../constants/index.js";
+import { FailColor, SuccessColor } from "../constants/color.js";
+import { AppStartMode, ConfirmType, UpdateVersionNumType, UpdateVersionNumTypeDicts } from "../constants/index.js";
 import { packageJson } from "../packageJson.js";
 import { createLog } from "../utils/createLog.js";
 import { chunkArray, getQueryString, parseQueryString } from "../utils/global.js";
@@ -28,7 +20,6 @@ import { getConfig } from "../config/index.js";
 import { getApps } from "../appManage/getApps.js";
 import { cleanupTempHashFolders } from "../utils/cleanupTempFolders.js";
 import { createApps } from "../appManage/createApps.js";
-import { EnvName } from "../types/config.js";
 
 // 注册自定义 prompt（必须）
 inquirer.registerPrompt("checkbox-plus", CheckboxPlus);
@@ -46,7 +37,6 @@ interface ReleaseOptions {
 interface ReleaseApp {
   packageName: string;
   env: string;
-  appVersionType: string;
   updateVersionNumType: string;
 }
 
@@ -123,24 +113,7 @@ async function release(args: ReleaseOptions) {
       return;
     }
 
-    const { appVersionTypes }: { appVersionTypes: AppVersionType[] } = await inquirer.prompt([
-      {
-        type: "checkbox",
-        name: "appVersionTypes",
-        message: "请选择版本类型：",
-        choices: AppVersionTypeDicts.map((item) => ({
-          value: item.value,
-          name: item.label,
-        })),
-      },
-    ]);
-
-    if (appVersionTypes.length <= 0) {
-      console.log(chalk.bgHex(FailColor)(`未选择要发布的版本类型`));
-      return;
-    }
-
-    const { envs }: { envs: EnvName[] } = await inquirer.prompt([
+    const { envs }: { envs: string[] } = await inquirer.prompt([
       {
         type: "checkbox",
         name: "envs",
@@ -151,24 +124,13 @@ async function release(args: ReleaseOptions) {
               .filter((item) => appPackageNames.some((packageName) => packageName === item.packageName))
               .map((item) => item.envs || [])
               .flat()
+              .filter((item) => !!item.ciRobot)
               .map((item) => item.name)
           ),
-        ]
-          .filter((item) => {
-            // 不允许发布开发环境
-            if (item === "development") {
-              return false;
-            }
-            // 正式环境只能发布正式版本
-            if (appVersionTypes.length === 1 && appVersionTypes[0] === AppVersionType.RELEASE) {
-              return item === "production";
-            }
-            return true;
-          })
-          .map((item) => ({
-            value: item,
-            name: item,
-          })),
+        ].map((item) => ({
+          value: item,
+          name: item,
+        })),
       },
     ]);
 
@@ -196,24 +158,15 @@ async function release(args: ReleaseOptions) {
         console.error(`未找到项目: ${appPackageName}`);
         continue;
       }
-      for (const appVersionType of appVersionTypes) {
-        for (const env of envs) {
-          if (!appConfig.envs?.some((item) => item.name === env)) {
-            continue;
-          }
-          // 正式环境固定为正式版本
-          if (appVersionType === AppVersionType.RELEASE) {
-            if (env !== "production") {
-              continue;
-            }
-          }
-          releaseApps.push({
-            packageName: appPackageName,
-            env,
-            appVersionType,
-            updateVersionNumType,
-          });
+      for (const env of envs) {
+        if (!appConfig.envs?.some((item) => item.name === env)) {
+          continue;
         }
+        releaseApps.push({
+          packageName: appPackageName,
+          env,
+          updateVersionNumType,
+        });
       }
     }
   }
@@ -233,10 +186,8 @@ async function release(args: ReleaseOptions) {
       }
       return {
         name: `${appConfig.description || appConfig.name} [${appConfig.key}]: ${
-          AppVersionTypeDicts.find((type) => type.value === item.appVersionType)?.label
-        }-${appConfig.envs?.find((env) => env.name === item.env)?.description || item.env}-${
-          UpdateVersionNumTypeDicts.find((type) => type.value === item.updateVersionNumType)?.label
-        }`,
+          appConfig.envs?.find((env) => env.name === item.env)?.description || item.env
+        }-${UpdateVersionNumTypeDicts.find((type) => type.value === item.updateVersionNumType)?.label}`,
         value: index,
         item,
       };
@@ -299,13 +250,10 @@ async function release(args: ReleaseOptions) {
           console.error(`未找到项目: ${appPackageName}`);
           return;
         }
-        for (const { env, appVersionType, updateVersionNumType } of releaseApps.filter(
-          (item) => item.packageName === appPackageName
-        )) {
+        for (const { env, updateVersionNumType } of releaseApps.filter((item) => item.packageName === appPackageName)) {
           releaseResults.push({
             packageName: appPackageName,
             env,
-            appVersionType,
             updateVersionNumType,
             ...(await runTask({
               logFilePath: path.join(logDir, `${appConfig.key}-release-log.md`),
@@ -315,11 +263,10 @@ async function release(args: ReleaseOptions) {
                 `-m ${AppStartMode.BUILD}`,
                 `-e ${env}`,
                 `-u ${ConfirmType.YES}`,
-                `-v ${appVersionType}`,
                 `-t ${updateVersionNumType}`,
                 `-c ${ConfirmType.NO}`,
               ].join(" "),
-              title: `[${appConfig.index}]:${appConfig.key}#${env}-${appVersionType}-${updateVersionNumType}`,
+              title: `[${appConfig.index}]:${appConfig.key}#${env}-${updateVersionNumType}`,
               color: appConfig.signColor,
               cwd: config.dirs.rootDir,
             })),
@@ -355,11 +302,10 @@ async function release(args: ReleaseOptions) {
       "\n",
       chalk.green(
         `npx taozi-ues-release -s "${failResults
-          .map(({ packageName, env, appVersionType, updateVersionNumType }) => {
+          .map(({ packageName, env, updateVersionNumType }) => {
             const releaseApp: ReleaseApp = {
               packageName,
               env,
-              appVersionType,
               updateVersionNumType,
             };
             return getQueryString(releaseApp as unknown as Record<string, string>);
