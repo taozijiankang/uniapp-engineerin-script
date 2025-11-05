@@ -11,8 +11,6 @@ import path from "path";
 import {
   AppStartMode,
   AppStartModeDicts,
-  AppVersionType,
-  AppVersionTypeDicts,
   ConfirmType,
   ConfirmTypeDicts,
   UpdateVersionNumType,
@@ -58,10 +56,6 @@ program
     `是否在微信开发者工具中打开，可选值：${ConfirmTypeDicts.map((item) => item.value).join("|")}`
   )
   .option("-u, --upload <upload>", `是否上传小程序，可选值：${ConfirmTypeDicts.map((item) => item.value).join("|")}`)
-  .option(
-    "-v, --appVersionType <appVersionType>",
-    `小程序版本类型，可选值：${AppVersionTypeDicts.map((item) => item.value).join("|")}`
-  )
   .option(
     "-t, --updateVersionNumType <updateVersionNumType>",
     `更新版本号类型，可选值：${UpdateVersionNumTypeDicts.map((item) => item.value).join("|")}`
@@ -199,25 +193,6 @@ async function appStart(args: AppStartOptions) {
       }
     }
     if (args.upload === ConfirmType.YES) {
-      if (!args.appVersionType) {
-        const { appVersionType } = await inquirer.prompt([
-          {
-            type: "list",
-            name: "appVersionType",
-            message: "请选择小程序版本类型：",
-            default: AppVersionType.TRIAL,
-            choices: AppVersionTypeDicts.map((item) => ({
-              value: item.value,
-              name: item.label,
-            })),
-          },
-        ]);
-        args.appVersionType = appVersionType;
-      } else {
-        if (!AppVersionTypeDicts.find((item) => item.value === args.appVersionType)) {
-          throw new Error(`无效的小程序版本类型: ${args.appVersionType}`);
-        }
-      }
       if (!args.updateVersionNumType) {
         const { updateVersionNumType } = await inquirer.prompt([
           {
@@ -305,7 +280,6 @@ async function appStart(args: AppStartOptions) {
     }
     await uploadMp({
       appConfig: onSelectAppConfig,
-      appVersionType: args.appVersionType as AppVersionType,
       env: args.env,
       updateVersionNumType: args.updateVersionNumType as UpdateVersionNumType,
       appid,

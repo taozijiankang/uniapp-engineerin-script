@@ -63,14 +63,6 @@ export interface ProjectConfigExtend extends ProjectConfig {
  */
 export type AppType = "cloud-outpatient" | "internet-hospital";
 
-/**
- * 环境名称
- * production 生产环境
- * development 开发环境
- * test 测试环境
- */
-export type EnvName = "production" | "development" | "test";
-
 export interface AppConfig<AppEnv extends any = any> {
   /** app名字 */
   name: string;
@@ -83,11 +75,41 @@ export interface AppConfig<AppEnv extends any = any> {
   /** 所有环境 */
   envs?: {
     /** 环境名称 */
-    name: EnvName;
+    name: string;
     /** 环境描述 */
     description: string;
-    /** ci机器人编号 1-9 */
-    ciRobot: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+    /** ci机器人编号 1-30 */
+    ciRobot?:
+      | 1
+      | 2
+      | 3
+      | 4
+      | 5
+      | 6
+      | 7
+      | 8
+      | 9
+      | 10
+      | 11
+      | 12
+      | 13
+      | 14
+      | 15
+      | 16
+      | 17
+      | 18
+      | 19
+      | 20
+      | 21
+      | 22
+      | 23
+      | 24
+      | 25
+      | 26
+      | 27
+      | 28
+      | 29
+      | 30;
     /** 环境配置 */
     value: AppEnv;
   }[];
