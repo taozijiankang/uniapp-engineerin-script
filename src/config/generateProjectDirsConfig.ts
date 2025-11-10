@@ -11,7 +11,6 @@ import { ProjectConfigExtend } from "../types/config.js";
 export function generateProjectDirsConfig(rootDir: string): ProjectConfigExtend["dirs"] {
   const appsContainerDir = getAppsContainerDir(rootDir);
   const appsDir = getAppsDir(appsContainerDir);
-  const appKeysDir = getAppKeysDir(rootDir);
   const packagesDir = getPackagesDir(rootDir);
   const corePackageDir = getCorePackageDir(packagesDir);
   const appPackageDir = getAppPackageDir(packagesDir);
@@ -22,7 +21,6 @@ export function generateProjectDirsConfig(rootDir: string): ProjectConfigExtend[
     rootDir,
     appsContainerDir,
     appsDir,
-    appKeysDir,
     packagesDir,
     corePackageDir,
     appPackageDir,
@@ -97,14 +95,6 @@ function getAppsDir(appsContainerDir: string) {
     fs.mkdirSync(appsDir, { recursive: true });
   }
   return appsDir;
-}
-
-function getAppKeysDir(rootDir: string) {
-  const appKeysDir = path.join(rootDir, "./app-keys");
-  if (!fs.statSync(appKeysDir, { throwIfNoEntry: false })?.isDirectory()) {
-    fs.mkdirSync(appKeysDir, { recursive: true });
-  }
-  return appKeysDir;
 }
 
 function getPackagesDir(rootDir: string) {

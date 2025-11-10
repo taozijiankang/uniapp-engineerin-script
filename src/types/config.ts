@@ -47,7 +47,6 @@ export interface ProjectConfigExtend extends ProjectConfig {
     rootDir: string;
     appsContainerDir: string;
     appsDir: string;
-    appKeysDir: string;
     packagesDir: string;
     corePackageDir: string;
     appPackageDir: string;
