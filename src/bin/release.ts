@@ -124,7 +124,13 @@ async function release(args: ReleaseOptions) {
               .filter((item) => appPackageNames.some((packageName) => packageName === item.packageName))
               .map((item) => item.envs || [])
               .flat()
-              .filter((item) => !!item.ciRobot)
+              .filter((item) => {
+                // 如果配置了微信小程序，则只选择有 ciRobot 的环境
+                if (!!config.wx) {
+                  return !!item.ciRobot;
+                }
+                return true;
+              })
               .map((item) => item.name)
           ),
         ].map((item) => ({
