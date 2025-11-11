@@ -239,6 +239,7 @@ async function release(args: ReleaseOptions) {
       appEnvKeyDicts: config.appEnvKeyDicts,
       distributionApp: config.distributionApp,
       wxConfig: config.wx,
+      opAppConfig: config.app,
     }
   );
 

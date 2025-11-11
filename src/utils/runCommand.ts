@@ -7,11 +7,7 @@ import { spawn } from "child_process";
  */
 export function runCommand(
   command: string,
-  {
-    cwd = "",
-    env = {},
-    handleStdout,
-  }: { cwd?: string; env?: Record<string, string>; handleStdout?: (d: string | Buffer) => void } = {}
+  { cwd = "", env = {}, handleStdout }: { cwd?: string; env?: Record<string, string>; handleStdout?: (d: Buffer) => void } = {}
 ) {
   /** @type {Promise<number | null>} */
   const p = new Promise((resolve) => {
@@ -25,13 +21,7 @@ export function runCommand(
       stdio: handleStdout ? undefined : "inherit",
     });
 
-    child.stdout?.setEncoding("utf-8");
-    child.stderr?.setEncoding("utf-8");
-
     child.stdout?.on("data", (data) => {
-      handleStdout?.(data);
-    });
-    child.stderr?.on("data", (data) => {
       handleStdout?.(data);
     });
 

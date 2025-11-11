@@ -1,19 +1,42 @@
 import { Loader } from "../appManage/loader/type.js";
+import { AppPackConfig } from "./appPackConfig.js";
+import { ToPromise } from "./glob.js";
 import { Page } from "./pages.js";
 
 export interface ProjectConfig {
+  /** HBuilderX 配置 */
+  HBuilderX?: {
+    /**
+     * HBuilderX cli 路径
+     * ## 命令行工具所在位置:
+     * #### Windows: HBuilderX安装目录根目录, cli.exe
+     * #### MacOSX:
+     * - 正式版 `/Applications/HBuilderX.app/Contents/MacOS/cli`
+     * - Alpha版 `/Applications/HBuilderX-Alpha.app/Contents/MacOS/cli`
+     * #### Linux: HBuilderX安装目录根目录, cli
+     */
+    cliPath: string;
+  };
   apps: AppConfig[];
   /** 微信小程序配置 */
   wx?: {
-    getAppInfo: (appConfig: AppConfig) => {
+    getAppInfo: (appConfig: AppConfigExtend) => ToPromise<{
       appid: string;
       privateKey: string;
-    };
+    }>;
+  };
+  /** app配置 */
+  app?: {
+    getHBuilderXAccount?: () => ToPromise<{
+      username: string;
+      password: string;
+    }>;
+    getPackConfig: (appConfig: AppConfigExtend) => ToPromise<AppPackConfig>;
   };
   /** 分发 app */
   distributionApp?: {
     /** 获取 app 的 scripts */
-    getAppScripts?: (appConfig: AppConfig) => Record<string, string>;
+    getAppScripts?: (appConfig: AppConfigExtend) => Record<string, string>;
     /** 加载器 */
     loaders?: Loader[];
   };
@@ -34,11 +57,11 @@ export interface ProjectConfig {
   /**
    * 创建 app 页面
    */
-  createAppPagesHandler?: (pageDir: string, page: Page) => void | Promise<void>;
+  createAppPagesHandler?: (pagePath: string, page: Page) => ToPromise<void>;
   /**
    * 创建 core 页面
    */
-  createCorePagesHandler?: (pageDir: string, page: Page) => void | Promise<void>;
+  createCorePagesHandler?: (pagePath: string, page: Page) => ToPromise<void>;
 }
 
 export interface ProjectConfigExtend extends ProjectConfig {

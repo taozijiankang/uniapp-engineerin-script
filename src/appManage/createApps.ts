@@ -5,6 +5,7 @@ import path from "path";
 import { chunkArray, hasDir, hasFile } from "../utils/global.js";
 import { isWindows } from "../utils/is.js";
 import { AppConfigExtend, ProjectConfigExtend } from "../types/config.js";
+import { AppPackConfigFilePath } from "../constants/index.js";
 
 export async function createApps(
   appsConfig: AppConfigExtend[],
@@ -14,9 +15,10 @@ export async function createApps(
     appEnvKeyDicts: ProjectConfigExtend["appEnvKeyDicts"];
     distributionApp: ProjectConfigExtend["distributionApp"];
     wxConfig: ProjectConfigExtend["wx"];
+    opAppConfig: ProjectConfigExtend["app"];
   }
 ) {
-  const { appPackageDir, appSyncHandleNumber, appEnvKeyDicts, distributionApp, wxConfig } = op;
+  const { appPackageDir, appSyncHandleNumber, appEnvKeyDicts, distributionApp, wxConfig, opAppConfig } = op;
 
   const linkDirs = ["src/TUICallKit-Wechat", "src/TUICallKit-Vue", "src/uni_modules"];
 
@@ -106,12 +108,24 @@ export async function createApps(
             const temManifestJsonPath = path.join(appPackageDir, filePath);
             let temManifestStr = (await fs.promises.readFile(temManifestJsonPath)).toString();
             if (!!wxConfig) {
-              const { appid } = wxConfig.getAppInfo(appConfig);
+              const { appid } = await Promise.resolve(wxConfig.getAppInfo(appConfig));
               temManifestStr = temManifestStr.replace(/("mp-weixin"\s*:\s*{\s*)("appid"\s*:\s*".*?")/, (_, a) => {
                 return `${a}${`"appid": "${appid || "appid"}"`}`;
               });
             }
             await fs.promises.writeFile(manifestJsonPath, temManifestStr);
+          })(),
+          /**
+           * 生成 app pack 配置文件
+           */
+          (async () => {
+            if (!!opAppConfig) {
+              const appPackConfig = await Promise.resolve(opAppConfig.getPackConfig(appConfig));
+
+              appPackConfig.project = appConfig.path.replace(/\\/g, "/");
+
+              fs.writeFileSync(path.join(appConfig.path, AppPackConfigFilePath), JSON.stringify(appPackConfig, null, 2));
+            }
           })(),
           /**
            * 创建符号链接
