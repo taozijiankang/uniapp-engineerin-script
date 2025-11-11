@@ -29,9 +29,13 @@ const __dirname = path.dirname(__filename);
 
 interface ReleaseOptions {
   /** 要发布的项目，多个项目用逗号分隔 */
-  apps: string;
-  /** 是否发布所有项目 */
-  all: string;
+  apps?: string;
+  /** 默认全选 */
+  all?: boolean;
+  /** 环境 */
+  envs?: string;
+  /** 更新版本号类型 */
+  updateVersionNumType?: string;
 }
 
 interface ReleaseApp {
@@ -44,7 +48,9 @@ program
   .version(packageJson.version)
   .description("发布项目")
   .option("-s, --apps <apps>", "要发布的项目，多个项目用逗号分隔，query 参数格式：packageName=xxx&env=xxx&type=xxx&version=xxx")
-  .option("-a, --all", "是否发布所有项目")
+  .option("-a, --all", "默认全选")
+  .option("-e, --envs <envs>", "环境")
+  .option("-u, --updateVersionNumType <updateVersionNumType>", "更新版本号类型")
   .action(() => {
     release(program.opts());
   })
@@ -53,7 +59,14 @@ program
 async function release(args: ReleaseOptions) {
   const config = await getConfig();
 
-  const { apps: argsApps = "", all: argsAll = false } = args;
+  let {
+    apps: argsApps = "",
+    all: argsAll = false,
+    envs: argsEnvStr = "",
+    updateVersionNumType: argsUpdateVersionNumType = "",
+  } = args;
+
+  let argsEnvs: string[] = argsEnvStr.split(",").filter(Boolean);
 
   const releaseKey = `${dayjs().format("YYYY-MM-DD_HH-mm-ss")}`;
   const logDir = path.join(config.dirs.logsDir, releaseKey);
@@ -113,44 +126,62 @@ async function release(args: ReleaseOptions) {
       return;
     }
 
-    const { envs }: { envs: string[] } = await inquirer.prompt([
-      {
-        type: "checkbox",
-        name: "envs",
-        message: "请选择环境：",
-        choices: [
-          ...new Set(
-            appsConfig
-              .filter((item) => appPackageNames.some((packageName) => packageName === item.packageName))
-              .map((item) => item.envs || [])
-              .flat()
-              .filter((item) => !!item.ciRobot)
-              .map((item) => item.name)
-          ),
-        ].map((item) => ({
-          value: item,
-          name: item,
-        })),
-      },
-    ]);
+    if (argsEnvs.length <= 0) {
+      const { envs }: { envs: string[] } = await inquirer.prompt([
+        {
+          type: "checkbox",
+          name: "envs",
+          message: "请选择环境：",
+          choices: [
+            ...new Set(
+              appsConfig
+                .filter((item) => appPackageNames.some((packageName) => packageName === item.packageName))
+                .map((item) => item.envs || [])
+                .flat()
+                .filter((item) => {
+                  // 如果配置了微信小程序，则只选择有 ciRobot 的环境
+                  if (!!config.wx) {
+                    return !!item.ciRobot;
+                  }
+                  return true;
+                })
+                .map((item) => item.name)
+            ),
+          ].map((item) => ({
+            value: item,
+            name: item,
+          })),
+        },
+      ]);
 
-    if (envs.length <= 0) {
+      argsEnvs = envs;
+    }
+
+    if (argsEnvs.length <= 0) {
       console.log(chalk.bgHex(FailColor)(`未选择要发布的环境`));
       return;
     }
 
-    const { updateVersionNumType }: { updateVersionNumType: UpdateVersionNumType } = await inquirer.prompt([
-      {
-        type: "list",
-        name: "updateVersionNumType",
-        message: "请选择更新版本号类型：",
-        default: UpdateVersionNumType.PATCH,
-        choices: UpdateVersionNumTypeDicts.map((item) => ({
-          value: item.value,
-          name: item.label,
-        })),
-      },
-    ]);
+    if (!argsUpdateVersionNumType) {
+      const { updateVersionNumType }: { updateVersionNumType: UpdateVersionNumType } = await inquirer.prompt([
+        {
+          type: "list",
+          name: "updateVersionNumType",
+          message: "请选择更新版本号类型：",
+          default: UpdateVersionNumType.PATCH,
+          choices: UpdateVersionNumTypeDicts.map((item) => ({
+            value: item.value,
+            name: item.label,
+          })),
+        },
+      ]);
+
+      argsUpdateVersionNumType = updateVersionNumType;
+    } else {
+      if (!UpdateVersionNumTypeDicts.find((item) => item.value === argsUpdateVersionNumType)) {
+        throw new Error(`无效的更新版本号类型: ${argsUpdateVersionNumType}`);
+      }
+    }
 
     for (const appPackageName of appPackageNames) {
       const appConfig = appsConfig.find((app) => app.packageName === appPackageName);
@@ -158,14 +189,14 @@ async function release(args: ReleaseOptions) {
         console.error(`未找到项目: ${appPackageName}`);
         continue;
       }
-      for (const env of envs) {
+      for (const env of argsEnvs) {
         if (!appConfig.envs?.some((item) => item.name === env)) {
           continue;
         }
         releaseApps.push({
           packageName: appPackageName,
           env,
-          updateVersionNumType,
+          updateVersionNumType: argsUpdateVersionNumType,
         });
       }
     }
@@ -233,6 +264,7 @@ async function release(args: ReleaseOptions) {
       appEnvKeyDicts: config.appEnvKeyDicts,
       distributionApp: config.distributionApp,
       wxConfig: config.wx,
+      opAppConfig: config.app,
     }
   );
 
@@ -331,13 +363,13 @@ async function runTask({
   cwd: string;
 }) {
   const logContents = ["", `## ${title}`, "", `### 命令: ${command}`, "", `### 日期: ${new Date().toLocaleString()}`, ""];
-  let commandLog = "";
+  let commandLog = Buffer.from([]);
   const log = createLog({ title, titleBgColor: color });
   const code = await runCommand(command, {
     cwd,
     handleStdout: (data) => {
       log(data.toString());
-      commandLog += data;
+      commandLog = Buffer.concat([commandLog, data]);
     },
   });
   const success = code == 0;
@@ -347,7 +379,7 @@ async function runTask({
   log(resultMessage);
 
   logContents.push(`### 结果: ${success ? "✅成功" : "❌失败"}`, "");
-  logContents.push(`\`\`\`log\n${commandLog}\n\`\`\``);
+  logContents.push(`\`\`\`log\n${commandLog.toString().trim()}\n\`\`\``);
   fs.writeFileSync(logFilePath, logContents.join("\n"), {
     flag: "a",
   });

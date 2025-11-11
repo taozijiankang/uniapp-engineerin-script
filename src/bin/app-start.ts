@@ -225,6 +225,7 @@ async function appStart(args: AppStartOptions) {
         appEnvKeyDicts: config.appEnvKeyDicts,
         distributionApp: config.distributionApp,
         wxConfig: config.wx,
+        opAppConfig: config.app,
       }
     );
     console.log(chalk.green("\n安装app项目依赖"));
@@ -274,7 +275,7 @@ async function appStart(args: AppStartOptions) {
   if (!!config.wx && args.mode === AppStartMode.BUILD && args.upload === ConfirmType.YES) {
     console.log(chalk.yellow("\n开始上传小程序"));
 
-    const { appid, privateKey } = config.wx.getAppInfo(onSelectAppConfig);
+    const { appid, privateKey } = await Promise.resolve(config.wx.getAppInfo(onSelectAppConfig));
     if (!appid || !privateKey) {
       throw new Error(`微信小程序id或私钥未配置: ${onSelectAppConfig.name} ${onSelectAppConfig.description}`);
     }
