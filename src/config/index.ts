@@ -2,7 +2,6 @@ import { lookupFile } from "../utils/global.js";
 import { ProjectConfigFileName } from "../constants/index.js";
 import path from "path";
 import { generateProjectDirsConfig } from "./generateProjectDirsConfig.js";
-import chalk from "chalk";
 import { pathToFileURL } from "url";
 import { ProjectConfigExtend } from "../types/config.js";
 import { defineConfig } from "./defineConfig.js";
@@ -18,7 +17,7 @@ export async function getConfig() {
       }
       const projectRootDir = path.dirname(projectConfigPath);
 
-      console.log(chalk.green(`项目根目录: ${projectRootDir} @ ${projectConfigPath}`));
+      console.log(`项目根目录: ${projectRootDir} @ ${projectConfigPath}`);
 
       let projectConfig: Parameters<typeof defineConfig>[0] = await import(pathToFileURL(projectConfigPath).toString()).then(
         (res) => res.default

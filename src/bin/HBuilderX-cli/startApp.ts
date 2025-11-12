@@ -6,6 +6,7 @@ import { HBuilderXIsOpen } from "./utils/is.js";
 import { runCommand } from "../../utils/runCommand.js";
 import path from "path";
 import { AppPackConfigFilePath } from "../../constants/index.js";
+import fs from "fs";
 
 export async function startApp(options: { packageName: string; mode: AppStartMode }) {
   const { packageName, mode } = options;
@@ -18,6 +19,11 @@ export async function startApp(options: { packageName: string; mode: AppStartMod
 
   if (!cliPath) {
     console.error(chalk.red("请在项目配置中配置 HBuilderX cli 路径"));
+    return;
+  }
+
+  if (!fs.statSync(cliPath, { throwIfNoEntry: false })?.isFile()) {
+    console.error(chalk.red(`HBuilderX cli 路径: ${cliPath} 不存在`));
     return;
   }
 
@@ -55,7 +61,7 @@ export async function startApp(options: { packageName: string; mode: AppStartMod
 
   // 开发模式
   if (mode === AppStartMode.DEV) {
-    console.log(chalk.green("已打开HBuilderX并导入项目"));
+    console.log(chalk.green(`已打开HBuilderX并导入项目 ${appConfig.key} ${appConfig.path}`));
   }
   // 构建模式
   else if (mode === AppStartMode.BUILD) {
