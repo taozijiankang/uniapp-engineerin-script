@@ -45,7 +45,7 @@ export async function createApps(
             let buffer = await fs.promises.readFile(sourceFilePath);
             for (const loader of distributionApp?.loaders || []) {
               if (typeof loader.rules === "function" ? loader.rules(item) : loader.rules.test(item)) {
-                buffer = Buffer.from(await loader.handler(sourceFilePath, appConfig, buffer));
+                buffer = Buffer.from(await loader.handler(sourceFilePath.replace(/\\/g, "/"), appConfig, buffer));
               }
             }
             await fs.promises.writeFile(targetFilePath, buffer);
