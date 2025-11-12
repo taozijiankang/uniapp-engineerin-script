@@ -363,13 +363,11 @@ async function runTask({
   cwd: string;
 }) {
   const logContents = ["", `## ${title}`, "", `### 命令: ${command}`, "", `### 日期: ${new Date().toLocaleString()}`, ""];
-  let commandLog = Buffer.from([]);
   const log = createLog({ title, titleBgColor: color });
-  const code = await runCommand(command, {
+  const { code, stdoutData } = await runCommand(command, {
     cwd,
     handleStdout: (data) => {
       log(data.toString());
-      commandLog = Buffer.concat([commandLog, data]);
     },
   });
   const success = code == 0;
@@ -379,7 +377,7 @@ async function runTask({
   log(resultMessage);
 
   logContents.push(`### 结果: ${success ? "✅成功" : "❌失败"}`, "");
-  logContents.push(`\`\`\`log\n${commandLog.toString().trim()}\n\`\`\``);
+  logContents.push(`\`\`\`log\n${stdoutData.toString().trim()}\n\`\`\``);
   fs.writeFileSync(logFilePath, logContents.join("\n"), {
     flag: "a",
   });

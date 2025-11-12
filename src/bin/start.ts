@@ -100,7 +100,7 @@ async function start(args: StartOptions) {
 
 async function runTask({ command, title, color, cwd }: { command: string; title: string; color: string; cwd: string }) {
   const log = createLog({ title, titleBgColor: color });
-  const code = await runCommand(command, {
+  const { code } = await runCommand(command, {
     cwd,
     handleStdout: (data) => {
       log(data.toString());

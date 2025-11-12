@@ -2,14 +2,22 @@ import { spawn } from "child_process";
 
 /**
  * @param command
- * @param op
+ * @param options
  * @returns
  */
 export function runCommand(
   command: string,
-  { cwd = "", env = {}, handleStdout }: { cwd?: string; env?: Record<string, string>; handleStdout?: (d: Buffer) => void } = {}
+  {
+    cwd = "",
+    env = {},
+    handleStdout,
+    handleStderr,
+  }: { cwd?: string; env?: Record<string, string>; handleStdout?: (d: Buffer) => void; handleStderr?: (d: Buffer) => void } = {}
 ) {
-  const p = new Promise<number | null>((resolve) => {
+  const p = new Promise<{ code: number | null; stdoutData: Buffer; stderrData: Buffer }>((resolve) => {
+    let stdoutData = Buffer.from([]);
+    let stderrData = Buffer.from([]);
+
     const child = spawn(command, {
       cwd,
       env: {
@@ -20,12 +28,18 @@ export function runCommand(
       stdio: handleStdout ? undefined : "inherit",
     });
 
-    child.stdout?.on("data", (data) => {
-      handleStdout?.(data);
+    child.stdout?.on("data", (d) => {
+      stdoutData = Buffer.concat([stdoutData, d]);
+      handleStdout?.(d);
+    });
+
+    child.stderr?.on("data", (d) => {
+      stderrData = Buffer.concat([stderrData, d]);
+      handleStderr?.(d);
     });
 
     child.on("close", (code) => {
-      resolve(code);
+      resolve({ code, stdoutData, stderrData });
     });
   });
   return p;
