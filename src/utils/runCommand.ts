@@ -9,8 +9,7 @@ export function runCommand(
   command: string,
   { cwd = "", env = {}, handleStdout }: { cwd?: string; env?: Record<string, string>; handleStdout?: (d: Buffer) => void } = {}
 ) {
-  /** @type {Promise<number | null>} */
-  const p = new Promise((resolve) => {
+  const p = new Promise<number | null>((resolve) => {
     const child = spawn(command, {
       cwd,
       env: {
