@@ -15,7 +15,7 @@ export interface ProjectConfig {
      * - Alpha版 `/Applications/HBuilderX-Alpha.app/Contents/MacOS/cli`
      * #### Linux: HBuilderX安装目录根目录, cli
      */
-    cliPath: string;
+    cliPath?: string;
   };
   apps: AppConfig[];
   /** 微信小程序配置 */
