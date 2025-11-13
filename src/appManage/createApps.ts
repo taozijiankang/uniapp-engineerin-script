@@ -100,22 +100,6 @@ export async function createApps(
             await fs.promises.writeFile(appPackageJsonPath, JSON.stringify(temPackageJson, null, 2) + "\n");
           })(),
           /**
-           * 生成 src/manifest.json
-           */
-          (async () => {
-            const filePath = "src/manifest.json";
-            const manifestJsonPath = path.join(appConfig.path, filePath);
-            const temManifestJsonPath = path.join(appPackageDir, filePath);
-            let temManifestStr = (await fs.promises.readFile(temManifestJsonPath)).toString();
-            if (!!wxConfig) {
-              const { appid } = await Promise.resolve(wxConfig.getAppInfo(appConfig));
-              temManifestStr = temManifestStr.replace(/("mp-weixin"\s*:\s*{\s*)("appid"\s*:\s*".*?")/, (_, a) => {
-                return `${a}${`"appid": "${appid || "appid"}"`}`;
-              });
-            }
-            await fs.promises.writeFile(manifestJsonPath, temManifestStr);
-          })(),
-          /**
            * 生成 app pack 配置文件
            */
           (async () => {
