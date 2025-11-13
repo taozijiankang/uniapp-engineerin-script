@@ -11,6 +11,7 @@
     "taozi-ues-create-app-pages": "dist/bin/create-app-pages.js",
     "taozi-ues-create-core-pages": "dist/bin/create-core-pages.js",
     "taozi-ues-elder-transform": "dist/bin/elder-transform.js",
+    "taozi-ues-generate-app-item-manifest-json": "dist/bin/generate-app-item-manifest-json.js",
     "taozi-ues-generate-app-item-pages-json": "dist/bin/generate-app-item-pages-json.js",
     "taozi-ues-inquiry": "dist/bin/inquiry.js",
     "taozi-use-HBuilderX-cli": "dist/bin/HBuilderX-cli/index.js",
@@ -22,18 +23,20 @@
     "taozi-ues-test": "dist/bin/test.js"
   },
   "scripts": {
+    "clean-dist": "rimraf -g ./{dist,dist_node,*.tsbuildinfo}",
     "build": "tsc -b",
     "build-w": "tsc -b -w"
   },
   "devDependencies": {
     "@types/node": "^24.9.2",
+    "rimraf": "^6.1.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.8",
-    "@types/semver": "^7.7.1",
     "@types/js-yaml": "^4.0.9",
+    "@types/semver": "^7.7.1",
     "@types/unzipper": "^0.10.11",
     "chalk": "^4.1.2",
     "commander": "^12.1.0",

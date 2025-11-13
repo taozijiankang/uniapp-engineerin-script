@@ -72,6 +72,9 @@ importers:
       '@types/node':
         specifier: ^24.9.2
         version: 24.9.2
+      rimraf:
+        specifier: ^6.1.0
+        version: 6.1.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -4019,6 +4022,11 @@ packages:
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
     deprecated: Rimraf versions prior to v4 are no longer supported
+    hasBin: true
+
+  rimraf@6.1.0:
+    resolution: {integrity: sha512-DxdlA1bdNzkZK7JiNWH+BAx1x4tEJWoTofIopFo6qWUU94jYrFZ0ubY05TqH3nWPJ1nKa1JWVFDINZ3fnrle/A==}
+    engines: {node: 20 || >=22}
     hasBin: true
 
   run-async@2.4.1:
@@ -9199,6 +9207,11 @@ snapshots:
   rimraf@3.0.2:
     dependencies:
       glob: 7.2.3
+
+  rimraf@6.1.0:
+    dependencies:
+      glob: 11.0.3
+      package-json-from-dist: 1.0.1
 
   run-async@2.4.1: {}
 

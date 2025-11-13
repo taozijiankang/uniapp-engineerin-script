@@ -44,12 +44,7 @@ export async function startApp(options: { packageName: string; mode: AppStartMod
 
   // 再登录
   if (HBuilderXAccount?.username && HBuilderXAccount.password) {
-    let userInfo = Buffer.from([]);
-    await runCommand(`${cliPath} user info`, {
-      handleStdout: (d) => {
-        userInfo = Buffer.concat([userInfo, d]);
-      },
-    });
+    const { stdoutData: userInfo } = await runCommand(`${cliPath} user info`);
     if (!new RegExp(`^${HBuilderXAccount?.username || ""}$`, "m").test(userInfo.toString())) {
       console.log("登录 HBuilderX");
       await runCommand(`${cliPath} user login --username ${HBuilderXAccount.username}  --password ${HBuilderXAccount.password}`);

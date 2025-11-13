@@ -45,7 +45,7 @@ export async function createApps(
             let buffer = await fs.promises.readFile(sourceFilePath);
             for (const loader of distributionApp?.loaders || []) {
               if (typeof loader.rules === "function" ? loader.rules(item) : loader.rules.test(item)) {
-                buffer = Buffer.from(await loader.handler(sourceFilePath, appConfig, buffer));
+                buffer = Buffer.from(await loader.handler(sourceFilePath.replace(/\\/g, "/"), appConfig, buffer));
               }
             }
             await fs.promises.writeFile(targetFilePath, buffer);
@@ -98,22 +98,6 @@ export async function createApps(
             temPackageJson.dependencies = handleAppDependencies(temPackageJson.dependencies, appPackageDir);
             temPackageJson.devDependencies = handleAppDependencies(temPackageJson.devDependencies, appPackageDir);
             await fs.promises.writeFile(appPackageJsonPath, JSON.stringify(temPackageJson, null, 2) + "\n");
-          })(),
-          /**
-           * 生成 src/manifest.json
-           */
-          (async () => {
-            const filePath = "src/manifest.json";
-            const manifestJsonPath = path.join(appConfig.path, filePath);
-            const temManifestJsonPath = path.join(appPackageDir, filePath);
-            let temManifestStr = (await fs.promises.readFile(temManifestJsonPath)).toString();
-            if (!!wxConfig) {
-              const { appid } = await Promise.resolve(wxConfig.getAppInfo(appConfig));
-              temManifestStr = temManifestStr.replace(/("mp-weixin"\s*:\s*{\s*)("appid"\s*:\s*".*?")/, (_, a) => {
-                return `${a}${`"appid": "${appid || "appid"}"`}`;
-              });
-            }
-            await fs.promises.writeFile(manifestJsonPath, temManifestStr);
           })(),
           /**
            * 生成 app pack 配置文件
