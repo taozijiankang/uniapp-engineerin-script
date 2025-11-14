@@ -71,10 +71,9 @@ export interface ProjectConfigExtend extends ProjectConfig {
   dirs: {
     rootDir: string;
     packagesDir: string;
-    corePackageDir: string;
-    appPackageDir: string;
-    scriptsDir: string;
     logsDir: string;
+    corePackageDir: string;
+    appShellsDir: string;
   };
 }
 
@@ -88,6 +87,8 @@ export type AppType = "cloud-outpatient" | "internet-hospital";
 export interface AppConfig<AppEnv extends any = any> {
   /** app名字 */
   name: string;
+  /** uniapp 壳类型 */
+  uniappShellType: "app" | "h5" | "mp";
   /** app 类型 */
   type: AppType;
   /** 描述 */

@@ -10,32 +10,41 @@ import { AppPackConfigFilePath } from "../constants/index.js";
 export async function createApps(
   appsConfig: AppConfigExtend[],
   op: {
-    appPackageDir: string;
+    appShellsDir: string;
     appSyncHandleNumber: number;
     appEnvKeyDicts: ProjectConfigExtend["appEnvKeyDicts"];
     distributionApp: ProjectConfigExtend["distributionApp"];
-    wxConfig: ProjectConfigExtend["wx"];
     opAppConfig: ProjectConfigExtend["app"];
   }
 ) {
-  const { appPackageDir, appSyncHandleNumber, appEnvKeyDicts, distributionApp, wxConfig, opAppConfig } = op;
+  const { appShellsDir, appSyncHandleNumber, appEnvKeyDicts, distributionApp, opAppConfig } = op;
+
+  const getAppShellDir = (appConfig: AppConfigExtend) => {
+    const p = path.join(appShellsDir, appConfig.uniappShellType);
+    if (!fs.statSync(p, { throwIfNoEntry: false })?.isDirectory()) {
+      throw new Error(`app-shell 目录不存在: ${p}`);
+    }
+    return p;
+  };
 
   const linkDirs = ["src/TUICallKit-Wechat", "src/TUICallKit-Vue", "src/uni_modules"];
-
-  // 复制公共文件
-  const appFiles = await glob("**", {
-    cwd: appPackageDir,
-    ignore: ["node_modules/**", "dist/**", ...linkDirs.map((item) => `${item}/**`)],
-    dot: true,
-    nodir: true,
-  });
 
   for (const groupsApp of chunkArray(appsConfig, appSyncHandleNumber)) {
     await Promise.all(
       groupsApp.map(async (appConfig) => {
+        const appShellDir = getAppShellDir(appConfig);
+
+        // 复制公共文件
+        const appFiles = await glob("**", {
+          cwd: appShellDir,
+          ignore: ["node_modules/**", "dist/**", ...linkDirs.map((item) => `${item}/**`)],
+          dot: true,
+          nodir: true,
+        });
+
         await Promise.all(
           appFiles.map(async (item) => {
-            const sourceFilePath = path.join(appPackageDir, item);
+            const sourceFilePath = path.join(appShellDir, item);
             const targetFilePath = path.join(appConfig.path, item);
             try {
               await fs.promises.mkdir(path.dirname(targetFilePath), {
@@ -59,6 +68,8 @@ export async function createApps(
   for (const groupsApp of chunkArray(appsConfig, appSyncHandleNumber)) {
     await Promise.all(
       groupsApp.map(async (appConfig) => {
+        const appShellDir = getAppShellDir(appConfig);
+
         await Promise.all([
           /**
            * 生成 .env 文件
@@ -82,7 +93,7 @@ export async function createApps(
            */
           (async () => {
             const appPackageJsonPath = path.join(appConfig.path, "package.json");
-            const temPackageJsonPath = path.join(appPackageDir, "package.json");
+            const temPackageJsonPath = path.join(appShellDir, "package.json");
             const temPackageJson = JSON.parse((await fs.promises.readFile(temPackageJsonPath)).toString());
             let version = temPackageJson.version || "1.0.0";
             if (await hasFile(path.join(appConfig.path, "package.json"))) {
@@ -115,7 +126,7 @@ export async function createApps(
           (async () => {
             for (const pathName of linkDirs) {
               const toPath = path.join(appConfig.path, pathName);
-              const fromPath = path.join(appPackageDir, pathName);
+              const fromPath = path.join(appShellDir, pathName);
               if (!(await hasDir(fromPath))) {
                 continue;
               }

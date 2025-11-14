@@ -15,6 +15,7 @@ export const codeInject: LoaderHandler = (_: string, appConfig: AppConfigExtend,
     description: appConfig.description,
     comEnv: appConfig.comEnv,
     envs: appConfig.envs,
+    uniappShellType: appConfig.uniappShellType,
   };
   return buffer
     .toString()

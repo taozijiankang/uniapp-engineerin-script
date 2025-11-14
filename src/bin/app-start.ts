@@ -220,11 +220,10 @@ async function appStart(args: AppStartOptions) {
     await createApps(
       appsConfig.filter((item) => item.packageName === args.packageName),
       {
-        appPackageDir: config.dirs.appPackageDir,
+        appShellsDir: config.dirs.appShellsDir,
         appSyncHandleNumber: config.appSyncHandleNumber,
         appEnvKeyDicts: config.appEnvKeyDicts,
         distributionApp: config.distributionApp,
-        wxConfig: config.wx,
         opAppConfig: config.app,
       }
     );
