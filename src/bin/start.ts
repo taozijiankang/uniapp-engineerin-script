@@ -4,6 +4,7 @@ import inquirer from "inquirer";
 import path from "path";
 import { fileURLToPath } from "url";
 import { program } from "commander";
+import fs from "fs";
 
 import { ProjectStartType, ProjectStartTypeDicts } from "../constants/index.js";
 import { createLog } from "../utils/createLog.js";
@@ -41,6 +42,12 @@ async function start(args: StartOptions) {
 
   console.log(chalk.yellow("\n开始 主 流程\n"));
 
+  const appShellsDirs = fs
+    .readdirSync(config.dirs.appShellsDir)
+    .map((item) => path.join(config.dirs.appShellsDir, item))
+    .filter((item) => fs.statSync(item, { throwIfNoEntry: false })?.isDirectory())
+    .filter((item) => fs.statSync(path.join(item, "package.json"), { throwIfNoEntry: false })?.isFile());
+
   await Promise.all([
     runTask({
       command: `pnpm run start`,
@@ -48,12 +55,14 @@ async function start(args: StartOptions) {
       color: Colors[0]!,
       cwd: config.dirs.corePackageDir,
     }),
-    runTask({
-      command: `pnpm run start`,
-      title: "@packages/app:start",
-      color: Colors[1]!,
-      cwd: config.dirs.appPackageDir,
-    }),
+    ...appShellsDirs.map((item, index) =>
+      runTask({
+        command: `pnpm run start`,
+        title: `@app-shells/${path.basename(item)}:start`,
+        color: Colors[index + 2]!,
+        cwd: item,
+      })
+    ),
   ]);
 
   const { projectStartType } = await inquirer.prompt([

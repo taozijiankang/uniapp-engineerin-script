@@ -4,17 +4,23 @@ import { ProjectConfigExtend } from "../types/config.js";
 
 export function generateProjectDirsConfig(rootDir: string): ProjectConfigExtend["dirs"] {
   const packagesDir = getPackagesDir(rootDir);
-  const corePackageDir = getCorePackageDir(packagesDir);
-  const appPackageDir = getAppPackageDir(packagesDir);
-  const scriptsDir = getScriptPackageDir(packagesDir);
   const logsDir = getLogDir(rootDir);
+  const corePackageDir = getCorePackageDir(packagesDir);
+  const appShellsDir = getAppShellsDir(packagesDir);
+
+  if (!fs.statSync(appShellsDir, { throwIfNoEntry: false })?.isDirectory()) {
+    throw new Error(`app-shells 目录不存在: ${appShellsDir}`);
+  }
+
+  if (!fs.statSync(corePackageDir, { throwIfNoEntry: false })?.isDirectory()) {
+    throw new Error(`core 目录不存在: ${corePackageDir}`);
+  }
 
   return {
     rootDir,
     packagesDir,
     corePackageDir,
-    appPackageDir,
-    scriptsDir,
+    appShellsDir,
     logsDir,
   };
 }
@@ -27,12 +33,8 @@ function getCorePackageDir(packagesDir: string) {
   return path.join(packagesDir, "./core");
 }
 
-function getAppPackageDir(packagesDir: string) {
-  return path.join(packagesDir, "./app");
-}
-
-function getScriptPackageDir(packagesDir: string) {
-  return path.join(packagesDir, "./script");
+function getAppShellsDir(packagesDir: string) {
+  return path.join(packagesDir, "./app-shells");
 }
 
 function getLogDir(rootDir: string) {

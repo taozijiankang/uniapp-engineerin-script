@@ -259,11 +259,10 @@ async function release(args: ReleaseOptions) {
   await createApps(
     appsConfig.filter((item) => releaseAppPackageNames.some((packageName) => packageName === item.packageName)),
     {
-      appPackageDir: config.dirs.appPackageDir,
+      appShellsDir: config.dirs.appShellsDir,
       appSyncHandleNumber: config.appSyncHandleNumber,
       appEnvKeyDicts: config.appEnvKeyDicts,
       distributionApp: config.distributionApp,
-      wxConfig: config.wx,
       opAppConfig: config.app,
     }
   );
