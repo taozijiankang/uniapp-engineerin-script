@@ -17,6 +17,8 @@ export interface ProjectConfig {
      */
     cliPath?: string;
   };
+  /** apps 目录 */
+  appsDir: string;
   apps: AppConfig[];
   /** 微信小程序配置 */
   wx?: {
@@ -68,8 +70,6 @@ export interface ProjectConfigExtend extends ProjectConfig {
   appSyncHandleNumber: number;
   dirs: {
     rootDir: string;
-    appsContainerDir: string;
-    appsDir: string;
     packagesDir: string;
     corePackageDir: string;
     appPackageDir: string;

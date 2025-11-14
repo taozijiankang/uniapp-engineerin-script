@@ -268,9 +268,9 @@ async function release(args: ReleaseOptions) {
     }
   );
 
-  console.log("安装app项目依赖");
+  console.log("安装项目依赖");
   await runCommand("pnpm i", {
-    cwd: config.dirs.appsContainerDir,
+    cwd: config.dirs.rootDir,
   });
 
   const releaseResults: ({ resultMessage: string; success: boolean } & ReleaseApp)[] = [];

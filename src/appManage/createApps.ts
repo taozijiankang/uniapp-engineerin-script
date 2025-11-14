@@ -95,8 +95,6 @@ export async function createApps(
             temPackageJson.name = appConfig.packageName;
             temPackageJson.description = appConfig.description;
             temPackageJson.scripts = distributionApp?.getAppScripts?.(appConfig) || {};
-            temPackageJson.dependencies = handleAppDependencies(temPackageJson.dependencies, appPackageDir);
-            temPackageJson.devDependencies = handleAppDependencies(temPackageJson.devDependencies, appPackageDir);
             await fs.promises.writeFile(appPackageJsonPath, JSON.stringify(temPackageJson, null, 2) + "\n");
           })(),
           /**
@@ -138,29 +136,6 @@ export async function createApps(
       })
     );
   }
-}
-
-/**
- * 处理 app 的依赖
- * 主要是将workspace:* 替换为包的实际路径
- */
-function handleAppDependencies(dependencies: Record<string, string>, appPackageDir: string): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(dependencies).map(([key, value]) => {
-      if (value === "workspace:*") {
-        const realPath = path.join(appPackageDir, "node_modules", key);
-        const stat = fs.lstatSync(realPath, { throwIfNoEntry: false });
-        if (stat?.isSymbolicLink()) {
-          value = fs.readlinkSync(realPath);
-          if (!path.isAbsolute(value)) {
-            value = path.join(path.dirname(realPath), value);
-          }
-        }
-        return [key, value];
-      }
-      return [key, value];
-    })
-  );
 }
 
 function getEnvStr(env: Record<string, string | number | undefined>, envKeyDicts: ProjectConfigExtend["appEnvKeyDicts"] = []) {

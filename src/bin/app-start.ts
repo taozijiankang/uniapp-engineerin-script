@@ -228,9 +228,9 @@ async function appStart(args: AppStartOptions) {
         opAppConfig: config.app,
       }
     );
-    console.log(chalk.green("\n安装app项目依赖"));
+    console.log(chalk.green("\n安装项目依赖"));
     await runCommand("pnpm i", {
-      cwd: config.dirs.appsContainerDir,
+      cwd: config.dirs.rootDir,
     });
   }
 
@@ -266,7 +266,7 @@ async function appStart(args: AppStartOptions) {
   console.log(chalk.green("\n执行命令:"), command);
 
   await runCommand(command, {
-    cwd: config.dirs.appsContainerDir,
+    cwd: config.dirs.rootDir,
     env: {
       APP_START_MODE: args.mode,
     },

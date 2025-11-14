@@ -56,9 +56,6 @@ importers:
       inquirer-checkbox-plus-prompt:
         specifier: ^1.4.2
         version: 1.4.2(inquirer@8.2.7(@types/node@24.9.2))
-      js-yaml:
-        specifier: ^4.1.0
-        version: 4.1.0
       miniprogram-ci:
         specifier: ^2.0.10
         version: 2.1.26(eslint@8.57.1)

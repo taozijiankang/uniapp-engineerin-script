@@ -5,6 +5,7 @@ import { generateProjectDirsConfig } from "./generateProjectDirsConfig.js";
 import { pathToFileURL } from "url";
 import { ProjectConfigExtend } from "../types/config.js";
 import { defineConfig } from "./defineConfig.js";
+import fs from "fs";
 
 let getConfigCache: Promise<ProjectConfigExtend> | null = null;
 
@@ -26,6 +27,15 @@ export async function getConfig() {
       if (typeof projectConfig === "function") {
         projectConfig = await Promise.resolve(projectConfig());
       }
+
+      if (!path.isAbsolute(projectConfig.appsDir)) {
+        projectConfig.appsDir = path.join(projectRootDir, projectConfig.appsDir);
+      }
+
+      if (!fs.statSync(projectConfig.appsDir, { throwIfNoEntry: false })?.isDirectory()) {
+        fs.mkdirSync(projectConfig.appsDir, { recursive: true });
+      }
+
       const dirs = generateProjectDirsConfig(projectRootDir);
       resolve({
         ...projectConfig,
