@@ -270,6 +270,7 @@ async function release(args: ReleaseOptions) {
   console.log("安装项目依赖");
   await runCommand("pnpm i", {
     cwd: config.dirs.rootDir,
+    stdio: "inherit",
   });
 
   const releaseResults: ({ resultMessage: string; success: boolean } & ReleaseApp)[] = [];

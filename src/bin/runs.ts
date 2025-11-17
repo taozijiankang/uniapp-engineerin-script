@@ -30,5 +30,5 @@ async function runs() {
   ]);
 
   console.log(chalk.yellow("运行命令: "), chalk.green(command));
-  await runCommand(command, { cwd: process.cwd() });
+  await runCommand(command, { cwd: process.cwd(), stdio: "inherit" });
 }

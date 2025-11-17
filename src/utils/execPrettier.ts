@@ -9,5 +9,6 @@ import { runCommand } from "./runCommand.js";
 export function execPrettier(filePath: string, { cwd = "" }: { cwd?: string } = {}) {
   return runCommand(`npx prettier --write ${filePath}`, {
     cwd,
+    stdio: "inherit",
   });
 }

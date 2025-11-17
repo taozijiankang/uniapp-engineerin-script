@@ -89,6 +89,7 @@ async function start(args: StartOptions) {
       ].join(" "),
       {
         cwd: config.dirs.rootDir,
+        stdio: "inherit",
       }
     );
   } else {
@@ -102,6 +103,7 @@ async function start(args: StartOptions) {
       ].join(" "),
       {
         cwd: config.dirs.rootDir,
+        stdio: "inherit",
       }
     );
   }

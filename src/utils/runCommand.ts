@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import type { StdioOptions } from "node:child_process";
 
 /**
  * @param command
@@ -10,9 +11,16 @@ export function runCommand(
   {
     cwd = "",
     env = {},
+    stdio,
     handleStdout,
     handleStderr,
-  }: { cwd?: string; env?: Record<string, string>; handleStdout?: (d: Buffer) => void; handleStderr?: (d: Buffer) => void } = {}
+  }: {
+    cwd?: string;
+    env?: Record<string, string>;
+    stdio?: StdioOptions;
+    handleStdout?: (d: Buffer) => void;
+    handleStderr?: (d: Buffer) => void;
+  } = {}
 ) {
   const p = new Promise<{ code: number | null; stdoutData: Buffer; stderrData: Buffer }>((resolve) => {
     let stdoutData = Buffer.from([]);
@@ -25,7 +33,7 @@ export function runCommand(
         ...env,
       },
       shell: true,
-      stdio: handleStdout ? undefined : "inherit",
+      stdio,
     });
 
     child.stdout?.on("data", (d) => {
