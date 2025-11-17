@@ -36,11 +36,11 @@ program
 
     if (confirm === ConfirmType.YES) {
       if (options.confirmCommand) {
-        await runCommand(options.confirmCommand, { cwd: process.cwd() });
+        await runCommand(options.confirmCommand, { cwd: process.cwd(), stdio: "inherit" });
       }
     } else {
       if (options.cancelCommand) {
-        await runCommand(options.cancelCommand, { cwd: process.cwd() });
+        await runCommand(options.cancelCommand, { cwd: process.cwd(), stdio: "inherit" });
       }
     }
   });

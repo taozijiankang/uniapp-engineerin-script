@@ -230,6 +230,7 @@ async function appStart(args: AppStartOptions) {
     console.log(chalk.green("\n安装项目依赖"));
     await runCommand("pnpm i", {
       cwd: config.dirs.rootDir,
+      stdio: "inherit",
     });
   }
 
@@ -269,6 +270,7 @@ async function appStart(args: AppStartOptions) {
     env: {
       APP_START_MODE: args.mode,
     },
+    stdio: "inherit",
   });
 
   if (!!config.wx && args.mode === AppStartMode.BUILD && args.upload === ConfirmType.YES) {

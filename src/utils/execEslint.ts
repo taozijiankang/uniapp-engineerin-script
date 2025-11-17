@@ -9,5 +9,6 @@ import { runCommand } from "./runCommand.js";
 export function execEslint(filePath: string, { cwd = "" }: { cwd?: string } = {}) {
   return runCommand(`npx eslint --fix ${filePath}`, {
     cwd,
+    stdio: "inherit",
   });
 }

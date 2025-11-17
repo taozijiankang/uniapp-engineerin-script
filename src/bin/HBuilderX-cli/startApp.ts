@@ -39,7 +39,7 @@ export async function startApp(options: { packageName: string; mode: AppStartMod
 
   // 先打开HBuilderX
   if (!(await HBuilderXIsOpen(cliPath))) {
-    await runCommand(`${cliPath} open`);
+    await runCommand(`${cliPath} open`, { stdio: "inherit" });
   }
 
   // 再登录
@@ -47,12 +47,14 @@ export async function startApp(options: { packageName: string; mode: AppStartMod
     const { stdoutData: userInfo } = await runCommand(`${cliPath} user info`);
     if (!new RegExp(`^${HBuilderXAccount?.username || ""}$`, "m").test(userInfo.toString())) {
       console.log("登录 HBuilderX");
-      await runCommand(`${cliPath} user login --username ${HBuilderXAccount.username}  --password ${HBuilderXAccount.password}`);
+      await runCommand(`${cliPath} user login --username ${HBuilderXAccount.username}  --password ${HBuilderXAccount.password}`, {
+        stdio: "inherit",
+      });
     }
   }
 
   // 导入项目
-  await runCommand(`${cliPath} project open --path ${appConfig.path}`);
+  await runCommand(`${cliPath} project open --path ${appConfig.path}`, { stdio: "inherit" });
 
   // 开发模式
   if (mode === AppStartMode.DEV) {
@@ -62,6 +64,6 @@ export async function startApp(options: { packageName: string; mode: AppStartMod
   else if (mode === AppStartMode.BUILD) {
     console.log(chalk.yellow(`开始云打包项目 ${appConfig.key} ${appConfig.path}`));
 
-    await runCommand(`${cliPath} pack --config ${path.join(appConfig.path, AppPackConfigFilePath)}`);
+    await runCommand(`${cliPath} pack --config ${path.join(appConfig.path, AppPackConfigFilePath)}`, { stdio: "inherit" });
   }
 }
