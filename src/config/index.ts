@@ -1,11 +1,12 @@
+import fs from "fs";
+import path from "path";
+import { pathToFileURL } from "url";
+
 import { lookupFile } from "../utils/global.js";
 import { ProjectConfigFileName } from "../constants/index.js";
-import path from "path";
 import { generateProjectDirsConfig } from "./generateProjectDirsConfig.js";
-import { pathToFileURL } from "url";
 import { ProjectConfigExtend } from "../types/config.js";
 import { defineConfig } from "./defineConfig.js";
-import fs from "fs";
 
 let getConfigCache: Promise<ProjectConfigExtend> | null = null;
 

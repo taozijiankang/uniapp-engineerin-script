@@ -1,6 +1,7 @@
 import inquirer from "inquirer";
-import { BaseCommandOption } from "./BaseCommandOption.js";
 import { Command } from "commander";
+
+import { BaseCommandOption } from "./BaseCommandOption.js";
 
 export class SelectCommandOption extends BaseCommandOption {
   declare value?: string;

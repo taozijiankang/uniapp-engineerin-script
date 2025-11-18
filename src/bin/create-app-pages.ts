@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import fs from "fs";
 import path from "path";
+import chalk from "chalk";
 
 import { importTs } from "../utils/importTs.js";
 import { getConfig } from "../config/index.js";
 import { getAppPacks } from "../appManage/getAppPacks.js";
-import chalk from "chalk";
 import { PagesConfig } from "../types/pages.js";
 
 async function createAppPages() {

@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+
 import { ProjectConfigExtend } from "../types/config.js";
 
 export function generateProjectDirsConfig(rootDir: string): ProjectConfigExtend["dirs"] {
