@@ -27,7 +27,6 @@ export interface UploadMpOptions {
 }
 
 program
-  .command("upload-mp")
   .description("上传小程序")
   .option("-n, --packageName <packageName>", "项目包名")
   .option("-e, --env <env>", "环境")
@@ -37,13 +36,13 @@ program
   .option("-k, --privateKey <privateKey>", "privateKey")
   .action(async (options: UploadMpOptions) => {
     const { packageName, env, ciRobot, updateVersionNumType, appid, privateKey } = options;
-    const config = await getConfig();
-    const appsConfig = getApps(config);
 
     if (!packageName) {
       console.error(chalk.red("请指定项目包名"));
       return;
     }
+    const config = await getConfig();
+    const appsConfig = getApps(config);
     const appConfig = appsConfig.find((item) => item.packageName === packageName);
 
     if (!appConfig) {

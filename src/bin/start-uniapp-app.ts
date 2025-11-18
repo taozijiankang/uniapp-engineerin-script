@@ -21,19 +21,18 @@ export interface StartAppOptions {
 }
 
 program
-  .command("start-uniapp-app")
   .description("启动 uniapp app 项目")
   .option("-n, --packageName <packageName>", "项目包名")
   .option("-m, --mode <mode>", `模式 可选值：${AppStartModeDicts.map((item) => item.value).join("|")}`)
   .action(async (options: StartAppOptions) => {
     const { packageName, mode } = options;
-    const config = await getConfig();
-    const appsConfig = getApps(config);
 
     if (!packageName) {
       console.error(chalk.red("请指定项目包名"));
       return;
     }
+    const config = await getConfig();
+    const appsConfig = getApps(config);
     const appConfig = appsConfig.find((item) => item.packageName === packageName);
     if (!appConfig) {
       console.error(chalk.red(`未找到项目: ${packageName}`));
