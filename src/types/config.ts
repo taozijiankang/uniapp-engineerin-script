@@ -46,6 +46,8 @@ export interface ProjectConfig {
   distributionApp?: {
     /** 加载器 */
     loaders?: Loader[];
+    /** 获取 app 的 scripts */
+    getAppScripts?: (appConfig: AppConfigExtend) => Record<string, string>;
   };
   /** 运行命令列表 */
   runsCommands?: {
