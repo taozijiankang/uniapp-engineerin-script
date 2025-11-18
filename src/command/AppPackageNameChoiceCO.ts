@@ -1,8 +1,8 @@
-import { getApps } from "../../appManage/getApps.js";
-import { getConfig } from "../../config/index.js";
+import { getApps } from "../appManage/getApps.js";
+import { getConfig } from "../config/index.js";
 import { SelectCommandOption } from "./SelectCommandOption.js";
 import { Command } from "commander";
-import { AppConfigExtend } from "../../types/config.js";
+import { AppConfigExtend } from "../types/config.js";
 import inquirer from "inquirer";
 import fuzzy from "fuzzy";
 import path from "path";

@@ -2,7 +2,7 @@ import { Loader } from "../appManage/loader/type.js";
 import { AppPackConfig } from "./appPackConfig.js";
 import { ToPromise } from "./glob.js";
 import { Page } from "./pages.js";
-import { BaseCommandOption } from "../bin/command/index.js";
+import { BaseCommandOption } from "../command/BaseCommandOption.js";
 
 export interface ProjectConfig {
   /** 命令配置 */

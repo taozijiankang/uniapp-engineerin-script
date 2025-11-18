@@ -1,6 +1,6 @@
 import { SelectCommandOption } from "./SelectCommandOption.js";
-import { AppStartModeDicts } from "../../constants/dicts.js";
-import { AppStartMode } from "../../constants/enum.js";
+import { AppStartModeDicts } from "../constants/dicts.js";
+import { AppStartMode } from "../constants/enum.js";
 
 export class AppStartModeCO extends SelectCommandOption {
   constructor() {

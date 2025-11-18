@@ -1,6 +1,6 @@
-import { UpdateVersionNumTypeDicts } from "../../constants/dicts.js";
+import { UpdateVersionNumTypeDicts } from "../constants/dicts.js";
 import { SelectCommandOption } from "./SelectCommandOption.js";
-import { UpdateVersionNumType } from "../../constants/enum.js";
+import { UpdateVersionNumType } from "../constants/enum.js";
 
 export class UpdateVersionNumTypeCO extends SelectCommandOption {
   constructor() {
