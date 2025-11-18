@@ -8,12 +8,13 @@ import { PackageJson } from "../types/index.js";
 export function getApps(config: ProjectConfigExtend) {
   const projectPackage: PackageJson = JSON.parse(fs.readFileSync(path.join(config.dirs.rootDir, "./package.json")).toString());
   return config.apps.map((item, index) => {
+    const key = `${item.dirName}/${item.name}`.replace(/\\/g, "/");
     const res: AppConfigExtend = {
       ...item,
       index,
-      key: `${item.type}-${item.name}`,
-      packageName: `@${projectPackage.name}-${item.type}-app/${item.name}`,
-      path: path.join(config.appsDir, item.type, item.name),
+      key,
+      packageName: `@${projectPackage.name}-app/${key.replace(/\//g, "-")}`,
+      path: path.join(config.appsDir, item.dirName, item.name),
       signColor: Colors[index] || "#f9ed69",
     };
     return res;

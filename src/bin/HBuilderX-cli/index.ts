@@ -15,8 +15,8 @@ export interface StartAppOptions {
 }
 
 program
-  .command("start-app")
-  .description("启动 HBuilderX")
+  .command("start-uniapp-app")
+  .description("启动 uniapp app 项目")
   .option("-n, --packageName <packageName>", "项目包名")
   .option("-m, --mode <mode>", `模式 可选值：${AppStartModeDicts.map((item) => item.value).join("|")}`)
   .action(async (options: StartAppOptions) => {

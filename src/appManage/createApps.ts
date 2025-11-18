@@ -64,7 +64,9 @@ export async function createApps(
     );
   }
 
-  // 修改一些动态文件
+  /**
+   * 生成 动态文件
+   */
   for (const groupsApp of chunkArray(appsConfig, appSyncHandleNumber)) {
     await Promise.all(
       groupsApp.map(async (appConfig) => {
@@ -105,7 +107,6 @@ export async function createApps(
             temPackageJson.version = version;
             temPackageJson.name = appConfig.packageName;
             temPackageJson.description = appConfig.description;
-            temPackageJson.scripts = distributionApp?.getAppScripts?.(appConfig) || {};
             await fs.promises.writeFile(appPackageJsonPath, JSON.stringify(temPackageJson, null, 2) + "\n");
           })(),
           /**

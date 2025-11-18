@@ -13,7 +13,7 @@ export async function startApp(options: { packageName: string; mode: AppStartMod
 
   const config = await getConfig();
 
-  const HBuilderXAccount = await Promise.resolve(config.app?.getHBuilderXAccount?.());
+  const HBuilderXAccount = await Promise.resolve(config.HBuilderX?.getHBuilderXAccount?.());
 
   const cliPath = config.HBuilderX?.cliPath;
 

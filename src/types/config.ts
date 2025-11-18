@@ -2,8 +2,19 @@ import { Loader } from "../appManage/loader/type.js";
 import { AppPackConfig } from "./appPackConfig.js";
 import { ToPromise } from "./glob.js";
 import { Page } from "./pages.js";
+import { BaseCommandOption } from "../bin/command/index.js";
 
 export interface ProjectConfig {
+  /** 命令配置 */
+  commands: {
+    [key: string]: {
+      description: string;
+      setUp: () => ToPromise<{
+        options: BaseCommandOption[];
+        onAction: () => ToPromise<void>;
+      }>;
+    };
+  };
   /** HBuilderX 配置 */
   HBuilderX?: {
     /**
@@ -16,29 +27,23 @@ export interface ProjectConfig {
      * #### Linux: HBuilderX安装目录根目录, cli
      */
     cliPath?: string;
-  };
-  /** apps 目录 */
-  appsDir: string;
-  apps: AppConfig[];
-  /** 微信小程序配置 */
-  wx?: {
-    getAppInfo: (appConfig: AppConfigExtend) => ToPromise<{
-      appid: string;
-      privateKey: string;
-    }>;
-  };
-  /** app配置 */
-  app?: {
+    /**
+     * 获取 HBuilderX 账号
+     */
     getHBuilderXAccount?: () => ToPromise<{
       username: string;
       password: string;
     }>;
+  };
+  /** apps 目录 */
+  appsDir: string;
+  apps: AppConfig[];
+  /** app配置 */
+  app?: {
     getPackConfig: (appConfig: AppConfigExtend) => ToPromise<AppPackConfig>;
   };
   /** 分发 app */
   distributionApp?: {
-    /** 获取 app 的 scripts */
-    getAppScripts?: (appConfig: AppConfigExtend) => Record<string, string>;
     /** 加载器 */
     loaders?: Loader[];
   };
@@ -77,20 +82,13 @@ export interface ProjectConfigExtend extends ProjectConfig {
   };
 }
 
-/**
- * app 类型
- * cloud-outpatient 云门诊
- * internet-hospital 互联网医院
- */
-export type AppType = "cloud-outpatient" | "internet-hospital";
-
 export interface AppConfig<AppEnv extends any = any> {
   /** app名字 */
   name: string;
   /** uniapp 壳类型 */
   uniappShellType: "app" | "h5" | "mp";
-  /** app 类型 */
-  type: AppType;
+  /** app 目录名称 */
+  dirName: string;
   /** 描述 */
   description: string;
   /** 公共环境 */
@@ -101,38 +99,6 @@ export interface AppConfig<AppEnv extends any = any> {
     name: string;
     /** 环境描述 */
     description: string;
-    /** ci机器人编号 1-30 */
-    ciRobot?:
-      | 1
-      | 2
-      | 3
-      | 4
-      | 5
-      | 6
-      | 7
-      | 8
-      | 9
-      | 10
-      | 11
-      | 12
-      | 13
-      | 14
-      | 15
-      | 16
-      | 17
-      | 18
-      | 19
-      | 20
-      | 21
-      | 22
-      | 23
-      | 24
-      | 25
-      | 26
-      | 27
-      | 28
-      | 29
-      | 30;
     /** 环境配置 */
     value: AppEnv;
   }[];
@@ -145,7 +111,7 @@ export interface AppConfigExtend extends AppConfig {
   key: string;
   /** app 包名 全局唯一 */
   packageName: string;
-  /** app 路径 全局唯一 */
+  /** app 绝对路径 全局唯一 */
   path: string;
   /** app 标识颜色 */
   signColor: string;
