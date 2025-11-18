@@ -13,7 +13,7 @@ export function getApps(config: ProjectConfigExtend) {
       ...item,
       index,
       key,
-      packageName: `@${projectPackage.name}-app/${key.replace(/\//g, "-")}`,
+      packageName: `@${projectPackage.name}-app/${key.replace(/\//g, "-")}`.toLowerCase(),
       path: path.join(config.appsDir, item.dirName, item.name),
       signColor: Colors[index] || "#f9ed69",
     };
