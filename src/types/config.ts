@@ -77,12 +77,12 @@ export interface ProjectConfigExtend extends ProjectConfig {
 }
 
 export interface AppConfig<AppEnv extends any = any> {
+  /** app 目录名称 */
+  dirName: string;
   /** app名字 */
   name: string;
   /** uniapp 壳类型 */
   uniappShellType: "app" | "h5" | "mp";
-  /** app 目录名称 */
-  dirName: string;
   /** 描述 */
   description: string;
   /** 公共环境 */
@@ -101,12 +101,12 @@ export interface AppConfig<AppEnv extends any = any> {
 export interface AppConfigExtend extends AppConfig {
   /** app 索引 */
   index: number;
-  /** app 唯一标识 */
+  /** app 唯一标识 目录名称/app名字 */
   key: string;
-  /** app 包名 全局唯一 */
+  /** app 包名 全局唯一 @项目名称-app/目录名称-app名字 */
   packageName: string;
   /** app 绝对路径 全局唯一 */
   path: string;
-  /** app 标识颜色 */
+  /** app 标识颜色 根据索引生成 */
   signColor: string;
 }
