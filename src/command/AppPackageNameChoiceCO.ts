@@ -50,7 +50,7 @@ export class AppPackageNameChoiceCO extends SelectCommandOption {
     return this;
   }
 
-  async init() {
+  private async init() {
     const config = await getConfig();
 
     this.appsConfig = getApps(config);
