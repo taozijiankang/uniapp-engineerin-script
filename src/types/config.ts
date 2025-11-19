@@ -78,7 +78,7 @@ export interface ProjectConfigExtend extends ProjectConfig {
 
 export interface AppConfig<AppEnv extends any = any> {
   /** app 目录名称 */
-  dirName: string;
+  dirName?: string;
   /** app名字 */
   name: string;
   /** uniapp 壳类型 */
@@ -101,8 +101,6 @@ export interface AppConfig<AppEnv extends any = any> {
 export interface AppConfigExtend extends AppConfig {
   /** app 索引 */
   index: number;
-  /** app 唯一标识 目录名称/app名字 */
-  key: string;
   /** app 包名 全局唯一 @项目名称-app/目录名称-app名字 */
   packageName: string;
   /** app 绝对路径 全局唯一 */

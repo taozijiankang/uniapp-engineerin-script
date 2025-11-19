@@ -95,7 +95,7 @@ export async function startApp(options: { appConfig: AppConfigExtend; mode: AppS
     return;
   }
 
-  console.log("HBuilderX App start", appConfig.key, mode);
+  console.log("HBuilderX App start", appConfig.path, mode);
 
   // 先打开HBuilderX
   if (!(await HBuilderXIsOpen(cliPath))) {
@@ -118,11 +118,11 @@ export async function startApp(options: { appConfig: AppConfigExtend; mode: AppS
 
   // 开发模式
   if (mode === AppStartMode.DEV) {
-    console.log(chalk.green(`已打开HBuilderX并导入项目 ${appConfig.key} ${appConfig.path}`));
+    console.log(chalk.green(`已打开HBuilderX并导入项目 ${appConfig.path}`));
   }
   // 构建模式
   else if (mode === AppStartMode.BUILD) {
-    console.log(chalk.yellow(`开始云打包项目 ${appConfig.key} ${appConfig.path}`));
+    console.log(chalk.yellow(`开始云打包项目 ${appConfig.path}`));
 
     await runCommand(`${cliPath} pack --config ${path.join(appConfig.path, AppPackConfigFilePath)}`, { stdio: "inherit" });
   }
