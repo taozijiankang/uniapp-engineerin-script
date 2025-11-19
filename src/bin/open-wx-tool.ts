@@ -46,6 +46,7 @@ export class OpenWxToolCommand extends Command {
     });
 
     return {
+      options: [packageNameOption, modeOption],
       onAction: async () => {
         const packageName = packageNameOption.value;
         const mode = modeOption.value;

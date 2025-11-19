@@ -15,7 +15,7 @@ export class SelectCommandOption extends BaseCommandOption {
   selectType: "single" | "multiple" = "single";
   defValue?: string[];
 
-  inquirerMessage: string = "请选择选项：";
+  inquirerMessage?: string;
 
   constructor(options: {
     name: string;
@@ -23,11 +23,13 @@ export class SelectCommandOption extends BaseCommandOption {
     options: { name: string; value: string }[];
     selectType: "single" | "multiple";
     defValue?: string[];
+    inquirerMessage?: string;
   }) {
     super(options);
     this.options = options.options;
     this.selectType = options.selectType;
     this.defValue = options.defValue;
+    this.inquirerMessage = options.inquirerMessage || this.description || "请选择选项：";
   }
 
   register(command: Command): void {

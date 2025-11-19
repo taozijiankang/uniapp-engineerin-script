@@ -44,6 +44,7 @@ export class StartUniappAppCommand extends Command {
       selectType: "single",
     });
     return {
+      options: [packageNameOption, modeOption],
       onAction: async () => {
         const packageName = packageNameOption.value;
         const mode = modeOption.value;
