@@ -1,7 +1,34 @@
-#!/usr/bin/env node
 import chalk from "chalk";
 import fs from "fs";
 import path from "path";
+
+import { Command } from "../command/Command.js";
+import { getRunCode } from "../utils/global.js";
+
+const COMMAND_NAME = "elder-transform";
+
+export type ElderTransformOptions = {};
+
+export class ElderTransformCommand extends Command {
+  constructor() {
+    super({
+      name: COMMAND_NAME,
+      description: "对小程序进行老年化适配转换",
+    });
+  }
+
+  async setUp() {
+    return {
+      onAction: async () => {
+        await elderTransform();
+      },
+    };
+  }
+
+  static getRunCode(options: ElderTransformOptions) {
+    return getRunCode(COMMAND_NAME, options);
+  }
+}
 
 async function elderTransform() {
   const currentCWDDir = process.cwd();
@@ -103,5 +130,3 @@ async function elderTransform() {
 
   console.log(chalk.green("elder-transform 执行完成"));
 }
-
-elderTransform();

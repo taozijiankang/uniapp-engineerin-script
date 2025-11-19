@@ -5,22 +5,7 @@
   "type": "module",
   "license": "MIT",
   "bin": {
-    "taozi-ues-app-start": "dist/bin/app-start.js",
-    "taozi-ues-cleanup-temp-folders": "dist/bin/cleanup-temp-folders.js",
-    "taozi-ues-copy-plugin": "dist/bin/copy-plugin.js",
-    "taozi-ues-create-app-pages": "dist/bin/create-app-pages.js",
-    "taozi-ues-create-core-pages": "dist/bin/create-core-pages.js",
-    "taozi-ues-elder-transform": "dist/bin/elder-transform.js",
-    "taozi-ues-generate-app-item-manifest-json": "dist/bin/generate-app-item-manifest-json.js",
-    "taozi-ues-generate-app-item-pages-json": "dist/bin/generate-app-item-pages-json.js",
-    "taozi-ues-inquiry": "dist/bin/inquiry.js",
-    "taozi-use-HBuilderX-cli": "dist/bin/HBuilderX-cli/index.js",
-    "taozi-ues-miniprogram-subpackage-optimization": "dist/bin/miniprogram-subpackage-optimization.js",
-    "taozi-ues-open-app-in-wxtool": "dist/bin/open-app-in-wxtool.js",
-    "taozi-ues-release": "dist/bin/release.js",
-    "taozi-ues-runs": "dist/bin/runs.js",
-    "taozi-ues-start": "dist/bin/start.js",
-    "taozi-ues-test": "dist/bin/test.js"
+    "taozi-ues": "dist/bin/index.js"
   },
   "scripts": {
     "clean-dist": "rimraf -g ./{dist,dist_node,*.tsbuildinfo}",

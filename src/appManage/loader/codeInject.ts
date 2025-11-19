@@ -11,7 +11,7 @@ import { LoaderHandler } from "./type.js";
 export const codeInject: LoaderHandler = (_: string, appConfig: AppConfigExtend, buffer: Buffer) => {
   const appBaseConfig: AppConfig = {
     name: appConfig.name,
-    type: appConfig.type,
+    dirName: appConfig.dirName,
     description: appConfig.description,
     comEnv: appConfig.comEnv,
     envs: appConfig.envs,
