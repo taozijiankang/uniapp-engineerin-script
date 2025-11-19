@@ -19,8 +19,6 @@ export async function getConfig() {
       }
       const projectRootDir = path.dirname(projectConfigPath);
 
-      console.log(`项目根目录: ${projectRootDir} @ ${projectConfigPath}`);
-
       let projectConfig: Parameters<typeof defineConfig>[0] = await import(pathToFileURL(projectConfigPath).toString()).then(
         (res) => res.default
       );

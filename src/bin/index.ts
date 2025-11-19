@@ -1,4 +1,5 @@
 import { program } from "commander";
+
 import { getConfig } from "../config/index.js";
 import { packageJson } from "../packageJson.js";
 import { CleanupTempHashFoldersCommand } from "./cleanup-temp-folders.js";
@@ -15,6 +16,7 @@ import { RunsCommand } from "./runs.js";
 import { StartUniappAppCommand } from "./start-uniapp-app.js";
 import { TestCommand } from "./test.js";
 import { UploadMpCommand } from "./upload-mp.js";
+import { getApps } from "../appManage/getApps.js";
 
 start();
 
@@ -43,9 +45,10 @@ async function start() {
    * 注册自定义命令
    */
   const config = await getConfig();
-  for (const command of config.customCommands || []) {
+  const appsConfig = getApps(config);
+  const customCommands = await config.customCommands?.(appsConfig);
+  for (const command of customCommands || []) {
     await command.register(program);
   }
-
   program.parse(process.argv);
 }

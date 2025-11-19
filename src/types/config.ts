@@ -6,7 +6,7 @@ import { Command } from "../command/Command.js";
 
 export interface ProjectConfig {
   /** 自定义命令配置 */
-  customCommands?: Command[];
+  customCommands?: (appsConfig: AppConfigExtend[]) => ToPromise<Command[]>;
   /** HBuilderX 配置 */
   HBuilderX?: {
     /**
