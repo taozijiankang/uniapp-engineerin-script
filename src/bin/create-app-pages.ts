@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
@@ -7,6 +6,33 @@ import { importTs } from "../utils/importTs.js";
 import { getConfig } from "../config/index.js";
 import { getAppPacks } from "../appManage/getAppPacks.js";
 import { PagesConfig } from "../types/pages.js";
+import { Command } from "../command/Command.js";
+import { getRunCode } from "../utils/global.js";
+
+const COMMAND_NAME = "create-app-pages";
+
+export type CreateAppPagesOptions = {};
+
+export class CreateAppPagesCommand extends Command {
+  constructor() {
+    super({
+      name: COMMAND_NAME,
+      description: "创建应用页面",
+    });
+  }
+
+  async setUp() {
+    return {
+      onAction: async () => {
+        await createAppPages();
+      },
+    };
+  }
+
+  static getRunCode(options: CreateAppPagesOptions) {
+    return getRunCode(COMMAND_NAME, options);
+  }
+}
 
 async function createAppPages() {
   const { createAppPagesHandler } = await getConfig();
@@ -78,8 +104,6 @@ async function createAppPages() {
       });
     });
 }
-
-createAppPages();
 
 function rmSync(path_: string, title?: string) {
   let stat = fs.statSync(path_, { throwIfNoEntry: false });

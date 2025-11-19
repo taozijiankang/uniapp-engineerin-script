@@ -1,34 +1,50 @@
-#!/usr/bin/env node
-import chalk from "chalk";
-import inquirer from "inquirer";
-
 import { runCommand } from "../utils/runCommand.js";
 import { getConfig } from "../config/index.js";
+import { Command } from "../command/Command.js";
+import { SelectCommandOption } from "../command/SelectCommandOption.js";
+import { getRunCode } from "../utils/global.js";
 
-runs();
+const COMMAND_NAME = "runs";
 
-async function runs() {
-  const config = await getConfig();
+export type RunsOptions = {
+  runsCommands?: string;
+};
 
-  const runsCommands = config.runsCommands || [];
+export class RunsCommand extends Command {
+  constructor() {
+    super({
+      name: COMMAND_NAME,
+      description: "执行命令",
+    });
+  }
+  async setUp() {
+    const config = await getConfig();
 
-  if (runsCommands.length === 0) {
-    console.log(chalk.yellow("没有可执行的命令"));
-    return;
+    const runsCommandsOption = new SelectCommandOption({
+      name: "runsCommands",
+      description: "选择要执行的命令",
+      options:
+        config.runsCommands?.map((item) => ({
+          name: `${item.command}: ${item.description}`,
+          value: item.command,
+        })) || [],
+      selectType: "single",
+    });
+
+    return {
+      options: [runsCommandsOption],
+      onAction: async () => {
+        let runsCommands = runsCommandsOption.value;
+        while (!runsCommandsOption.value) {
+          await runsCommandsOption.inquirer();
+          runsCommands = runsCommandsOption.value;
+        }
+        await runCommand(runsCommands!, { cwd: process.cwd(), stdio: "inherit" });
+      },
+    };
   }
 
-  const { command } = await inquirer.prompt([
-    {
-      message: "选择要执行的命令",
-      name: "command",
-      type: "list",
-      choices: runsCommands.map((item) => ({
-        name: `${item.command}: ${item.description}`,
-        value: item.command,
-      })),
-    },
-  ]);
-
-  console.log(chalk.yellow("运行命令: "), chalk.green(command));
-  await runCommand(command, { cwd: process.cwd(), stdio: "inherit" });
+  static getRunCode(options: RunsOptions) {
+    return getRunCode(COMMAND_NAME, options);
+  }
 }

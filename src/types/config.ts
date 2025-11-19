@@ -2,19 +2,11 @@ import { Loader } from "../appManage/loader/type.js";
 import { AppPackConfig } from "./appPackConfig.js";
 import { ToPromise } from "./glob.js";
 import { Page } from "./pages.js";
-import { BaseCommandOption } from "../command/BaseCommandOption.js";
+import { Command } from "../command/Command.js";
 
 export interface ProjectConfig {
-  /** 命令配置 */
-  commands: {
-    [key: string]: {
-      description: string;
-      setUp: () => ToPromise<{
-        options: BaseCommandOption[];
-        onAction: () => ToPromise<void>;
-      }>;
-    };
-  };
+  /** 自定义命令配置 */
+  customCommands?: Command[];
   /** HBuilderX 配置 */
   HBuilderX?: {
     /**

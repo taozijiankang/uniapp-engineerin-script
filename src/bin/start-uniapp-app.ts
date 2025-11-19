@@ -1,10 +1,7 @@
-#!/usr/bin/env node
-import { program } from "commander";
 import chalk from "chalk";
 import path from "path";
 import fs from "fs";
 
-import { packageJson } from "../packageJson.js";
 import { AppStartModeDicts } from "../constants/dicts.js";
 import { AppStartMode } from "../constants/enum.js";
 import { getConfig } from "../config/index.js";
@@ -12,49 +9,73 @@ import { getApps } from "../appManage/getApps.js";
 import { runCommand } from "../utils/runCommand.js";
 import { AppPackConfigFilePath } from "../constants/index.js";
 import { AppConfigExtend } from "../types/config.js";
+import { Command } from "../command/Command.js";
+import { StringCommandOption } from "../command/BaseCommandOption.js";
+import { SelectCommandOption } from "../command/SelectCommandOption.js";
+import { getRunCode } from "../utils/global.js";
 
-program.version(packageJson.version).description("启动 uniapp app 项目");
+const COMMAND_NAME = "start-uniapp-app";
 
-export interface StartAppOptions {
-  packageName?: string;
-  mode?: string;
-}
+export type StartUniappAppOptions = {
+  packageName: string;
+  mode: AppStartMode;
+};
 
-program
-  .description("启动 uniapp app 项目")
-  .option("-n, --packageName <packageName>", "项目包名")
-  .option("-m, --mode <mode>", `模式 可选值：${AppStartModeDicts.map((item) => item.value).join("|")}`)
-  .action(async (options: StartAppOptions) => {
-    const { packageName, mode } = options;
-
-    if (!packageName) {
-      console.error(chalk.red("请指定项目包名"));
-      return;
-    }
-    const config = await getConfig();
-    const appsConfig = getApps(config);
-    const appConfig = appsConfig.find((item) => item.packageName === packageName);
-    if (!appConfig) {
-      console.error(chalk.red(`未找到项目: ${packageName}`));
-      return;
-    }
-    if (!mode) {
-      console.error(chalk.red(`请指定启动模式(${AppStartModeDicts.map((item) => item.value).join("|")})`));
-      return;
-    } else {
-      if (!AppStartModeDicts.find((item) => item.value === mode)) {
-        console.error(chalk.red(`无效的模式: ${mode}`));
-        return;
-      }
-    }
-
-    await startApp({
-      appConfig,
-      mode: mode as AppStartMode,
+export class StartUniappAppCommand extends Command {
+  constructor() {
+    super({
+      name: COMMAND_NAME,
+      description: "启动 uniapp app 项目",
     });
-  });
+  }
+  async setUp() {
+    const packageNameOption = new StringCommandOption({
+      name: "packageName",
+      description: "项目包名",
+    });
 
-program.parse(process.argv);
+    const modeOption = new SelectCommandOption({
+      name: "mode",
+      description: "模式",
+      options: AppStartModeDicts.map((item) => ({
+        name: item.label,
+        value: item.value,
+      })),
+      selectType: "single",
+    });
+    return {
+      onAction: async () => {
+        const packageName = packageNameOption.value;
+        const mode = modeOption.value;
+
+        if (!packageName) {
+          console.error(chalk.red("请指定项目包名"));
+          return;
+        }
+        const config = await getConfig();
+        const appsConfig = getApps(config);
+        const appConfig = appsConfig.find((item) => item.packageName === packageName);
+        if (!appConfig) {
+          console.error(chalk.red(`未找到项目: ${packageName}`));
+          return;
+        }
+        if (!mode) {
+          console.error(chalk.red(`请指定启动模式(${AppStartModeDicts.map((item) => item.value).join("|")})`));
+          return;
+        }
+
+        await startApp({
+          appConfig,
+          mode: mode as AppStartMode,
+        });
+      },
+    };
+  }
+
+  static getRunCode(options: StartUniappAppOptions) {
+    return getRunCode(COMMAND_NAME, options);
+  }
+}
 
 export async function startApp(options: { appConfig: AppConfigExtend; mode: AppStartMode }) {
   const { appConfig, mode } = options;

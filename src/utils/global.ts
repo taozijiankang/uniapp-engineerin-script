@@ -94,3 +94,22 @@ export function lookupFile(dir: string, formats: string[]) {
     return lookupFile(parentDir, formats);
   }
 }
+
+/**
+ * 获取运行命令代码
+ * @param command 命令
+ * @param options 选项
+ * @returns 运行命令代码字符串
+ */
+export function getRunCode(command: string, options: Record<string, boolean | string | number>) {
+  return [
+    command,
+    ...Object.entries(options).map(([key, value]) => {
+      if (typeof value === "boolean") {
+        return value ? `--${key}` : "";
+      } else {
+        return `--${key} ${value}`;
+      }
+    }),
+  ].join(" ");
+}

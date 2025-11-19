@@ -1,12 +1,9 @@
-#!/usr/bin/env node
 import fs from "fs";
 import path from "path";
-import { program } from "commander";
 import semver from "semver";
 import type { CIProject } from "miniprogram-ci";
 import chalk from "chalk";
 
-import { packageJson } from "../packageJson.js";
 import { getGitInfo } from "../utils/getGitInfo.js";
 import { AppConfigExtend } from "../types/config.js";
 import { UpdateVersionNumType } from "../constants/enum.js";
@@ -14,85 +11,125 @@ import { UpdateVersionNumTypeDicts } from "../constants/dicts.js";
 import { getApps } from "../appManage/getApps.js";
 import { getConfig } from "../config/index.js";
 import { getRootDir } from "../pathManage.js";
+import { Command } from "../command/Command.js";
+import { StringCommandOption } from "../command/BaseCommandOption.js";
+import { getRunCode } from "../utils/global.js";
+import { WeixinCIProjectRobotNumber } from "../types/glob.js";
 
-program.version(packageJson.version).description("上传小程序");
+const COMMAND_NAME = "upload-mp";
 
-export interface UploadMpOptions {
-  packageName?: string;
-  env?: string;
-  ciRobot?: string;
-  updateVersionNumType?: string;
-  appid?: string;
-  privateKey?: string;
-}
+export type UploadMpOptions = {
+  packageName: string;
+  env: string;
+  ciRobot: WeixinCIProjectRobotNumber;
+  updateVersionNumType: UpdateVersionNumType;
+  appid: string;
+  privateKey: string;
+};
 
-program
-  .description("上传小程序")
-  .option("-n, --packageName <packageName>", "项目包名")
-  .option("-e, --env <env>", "环境")
-  .option("-r, --ciRobot <ciRobot>", "ci 机器人编号")
-  .option("-u, --updateVersionNumType <updateVersionNumType>", "更新版本号类型")
-  .option("-a, --appid <appid>", "appid")
-  .option("-k, --privateKey <privateKey>", "privateKey")
-  .action(async (options: UploadMpOptions) => {
-    const { packageName, env, ciRobot, updateVersionNumType, appid, privateKey } = options;
-
-    if (!packageName) {
-      console.error(chalk.red("请指定项目包名"));
-      return;
-    }
-    const config = await getConfig();
-    const appsConfig = getApps(config);
-    const appConfig = appsConfig.find((item) => item.packageName === packageName);
-
-    if (!appConfig) {
-      console.error(chalk.red(`未找到项目: ${packageName}`));
-      return;
-    }
-    if (!env) {
-      console.error(chalk.red("请指定环境"));
-      return;
-    }
-    if (!config.appEnvKeyDicts?.find((item) => item.value === env)) {
-      console.error(chalk.red(`未找到环境: ${env}`));
-      return;
-    }
-    if (!ciRobot) {
-      console.error(chalk.red("请指定 ci 机器人编号"));
-      return;
-    }
-    const ciRobotNumber = parseInt(ciRobot);
-    if (ciRobotNumber <= 0 || ciRobotNumber > 30) {
-      console.error(chalk.red("ci 机器人编号必须在 1-30 之间"));
-      return;
-    }
-    if (!updateVersionNumType) {
-      console.error(chalk.red("请指定更新版本号类型"));
-      return;
-    }
-    if (!UpdateVersionNumTypeDicts.find((item) => item.value === updateVersionNumType)) {
-      console.error(chalk.red(`无效的更新版本号类型: ${updateVersionNumType}`));
-      return;
-    }
-    if (!appid) {
-      console.error(chalk.red("请指定 appid"));
-      return;
-    }
-    if (!privateKey) {
-      console.error(chalk.red("请指定 privateKey"));
-      return;
-    }
-    await uploadMp({
-      appConfig,
-      env,
-      ciRobot: ciRobotNumber,
-      updateVersionNumType: updateVersionNumType as UpdateVersionNumType,
-      appid,
-      privateKey,
+export class UploadMpCommand extends Command {
+  constructor() {
+    super({
+      name: COMMAND_NAME,
+      description: "上传小程序",
     });
-  });
+  }
+  async setUp() {
+    const packageNameOption = new StringCommandOption({
+      name: "packageName",
+      description: "项目包名",
+    });
+    const envOption = new StringCommandOption({
+      name: "env",
+      description: "环境",
+    });
+    const ciRobotOption = new StringCommandOption({
+      name: "ciRobot",
+      description: "ci 机器人编号",
+    });
+    const updateVersionNumTypeOption = new StringCommandOption({
+      name: "updateVersionNumType",
+      description: "更新版本号类型",
+    });
+    const appidOption = new StringCommandOption({
+      name: "appid",
+      description: "appid",
+    });
+    const privateKeyOption = new StringCommandOption({
+      name: "privateKey",
+      description: "privateKey",
+    });
+    return {
+      options: [packageNameOption, envOption, ciRobotOption, updateVersionNumTypeOption, appidOption, privateKeyOption],
+      onAction: async () => {
+        const packageName = packageNameOption.value;
+        const env = envOption.value;
+        const ciRobot = ciRobotOption.value;
+        const updateVersionNumType = updateVersionNumTypeOption.value;
+        const appid = appidOption.value;
+        const privateKey = privateKeyOption.value;
 
-program.parse(process.argv);
+        if (!packageName) {
+          console.error(chalk.red("请指定项目包名"));
+          return;
+        }
+        const config = await getConfig();
+        const appsConfig = getApps(config);
+        const appConfig = appsConfig.find((item) => item.packageName === packageName);
+
+        if (!appConfig) {
+          console.error(chalk.red(`未找到项目: ${packageName}`));
+          return;
+        }
+        if (!env) {
+          console.error(chalk.red("请指定环境"));
+          return;
+        }
+        if (!config.appEnvKeyDicts?.find((item) => item.value === env)) {
+          console.error(chalk.red(`未找到环境: ${env}`));
+          return;
+        }
+        if (!ciRobot) {
+          console.error(chalk.red("请指定 ci 机器人编号"));
+          return;
+        }
+        const ciRobotNumber = parseInt(ciRobot);
+        if (ciRobotNumber <= 0 || ciRobotNumber > 30) {
+          console.error(chalk.red("ci 机器人编号必须在 1-30 之间"));
+          return;
+        }
+        if (!updateVersionNumType) {
+          console.error(chalk.red("请指定更新版本号类型"));
+          return;
+        }
+        if (!UpdateVersionNumTypeDicts.find((item) => item.value === updateVersionNumType)) {
+          console.error(chalk.red(`无效的更新版本号类型: ${updateVersionNumType}`));
+          return;
+        }
+        if (!appid) {
+          console.error(chalk.red("请指定 appid"));
+          return;
+        }
+        if (!privateKey) {
+          console.error(chalk.red("请指定 privateKey"));
+          return;
+        }
+        await uploadMp({
+          appConfig,
+          env,
+          ciRobot: ciRobotNumber,
+          updateVersionNumType: updateVersionNumType as UpdateVersionNumType,
+          appid,
+          privateKey,
+        });
+      },
+    };
+  }
+
+  static getRunCode(options: UploadMpOptions) {
+    return getRunCode(COMMAND_NAME, options);
+  }
+}
 
 async function uploadMp(options: {
   appConfig: AppConfigExtend;

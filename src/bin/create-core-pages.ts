@@ -1,12 +1,38 @@
-#!/usr/bin/env node
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
 
+import { Command } from "../command/Command.js";
 import { importTs } from "../utils/importTs.js";
 import { getConfig } from "../config/index.js";
 import { getAppPacks } from "../appManage/getAppPacks.js";
 import { PagesConfig } from "../types/pages.js";
+import { getRunCode } from "../utils/global.js";
+
+const COMMAND_NAME = "create-core-pages";
+
+export type CreateCorePagesOptions = {};
+
+export class CreateCorePagesCommand extends Command {
+  constructor() {
+    super({
+      name: COMMAND_NAME,
+      description: "创建 core 页面",
+    });
+  }
+
+  async setUp() {
+    return {
+      onAction: async () => {
+        await createCorePages();
+      },
+    };
+  }
+
+  static getRunCode(options: CreateCorePagesOptions) {
+    return getRunCode(COMMAND_NAME, options);
+  }
+}
 
 async function createCorePages() {
   const { createCorePagesHandler } = await getConfig();
@@ -52,5 +78,3 @@ async function createCorePages() {
     await createCorePagesHandler?.(pageComPath, page.pageConfig);
   }
 }
-
-createCorePages();

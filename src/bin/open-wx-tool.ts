@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-import { program } from "commander";
 import chalk from "chalk";
 import path from "path";
 import fs from "fs";
@@ -7,48 +5,75 @@ import { globSync } from "glob";
 import http from "http";
 
 import { AppStartModeDicts } from "../constants/dicts.js";
-import { packageJson } from "../packageJson.js";
 import { getConfig } from "../config/index.js";
 import { getApps } from "../appManage/getApps.js";
 import { isWindows } from "../utils/is.js";
+import { StringCommandOption } from "../command/BaseCommandOption.js";
+import { Command } from "../command/Command.js";
+import { SelectCommandOption } from "../command/SelectCommandOption.js";
+import { AppStartMode } from "../constants/enum.js";
+import { getRunCode } from "../utils/global.js";
 
-program.version(packageJson.version).description("在微信开发者工具中打开项目");
+const COMMAND_NAME = "open-wx-tool";
 
-export interface OpenWxToolOptions {
-  packageName?: string;
-  mode?: string;
+export type OpenWxToolOptions = {
+  packageName: string;
+  mode: AppStartMode;
+};
+
+export class OpenWxToolCommand extends Command {
+  constructor() {
+    super({
+      name: COMMAND_NAME,
+      description: "在微信开发者工具中打开项目",
+    });
+  }
+
+  async setUp() {
+    const packageNameOption = new StringCommandOption({
+      name: "packageName",
+      description: "项目包名",
+    });
+
+    const modeOption = new SelectCommandOption({
+      name: "mode",
+      description: "模式",
+      options: AppStartModeDicts.map((item) => ({
+        name: item.label,
+        value: item.value,
+      })),
+      selectType: "single",
+    });
+
+    return {
+      onAction: async () => {
+        const packageName = packageNameOption.value;
+        const mode = modeOption.value;
+
+        if (!packageName) {
+          console.error(chalk.red("请指定项目包名"));
+          return;
+        }
+        const config = await getConfig();
+        const appsConfig = getApps(config);
+        const appConfig = appsConfig.find((item) => item.packageName === packageName);
+        if (!appConfig) {
+          console.error(chalk.red(`未找到项目: ${packageName}`));
+          return;
+        }
+        if (!mode) {
+          console.error(chalk.red(`请指定模式(${AppStartModeDicts.map((item) => item.value).join("|")})`));
+          return;
+        }
+        await openWXTool(path.join(appConfig.path, "dist", mode as AppStartMode, "mp-weixin"));
+      },
+    };
+  }
+
+  static getRunCode(options: OpenWxToolOptions) {
+    return getRunCode(COMMAND_NAME, options);
+  }
 }
-
-program
-  .description("在微信开发者工具中打开项目")
-  .option("-n, --packageName <packageName>", "项目包名")
-  .option("-m, --mode <mode>", `模式 可选值：${AppStartModeDicts.map((item) => item.value).join("|")}`)
-  .action(async (options: OpenWxToolOptions) => {
-    const { packageName, mode } = options;
-    if (!packageName) {
-      console.error(chalk.red("请指定项目包名"));
-      return;
-    }
-    const config = await getConfig();
-    const appsConfig = getApps(config);
-    const appConfig = appsConfig.find((item) => item.packageName === packageName);
-    if (!appConfig) {
-      console.error(chalk.red(`未找到项目: ${packageName}`));
-      return;
-    }
-    if (!mode) {
-      console.error(chalk.red(`请指定模式(${AppStartModeDicts.map((item) => item.value).join("|")})`));
-      return;
-    } else {
-      if (!AppStartModeDicts.find((item) => item.value === mode)) {
-        console.error(chalk.red(`无效的模式: ${mode}`));
-        return;
-      }
-    }
-    await openWXTool(path.join(appConfig.path, "dist", mode, "mp-weixin"));
-  });
-
-program.parse(process.argv);
 
 async function openWXTool(projectPath: string) {
   const homeDir = isWindows() ? process.env.USERPROFILE : process.env.HOME;
