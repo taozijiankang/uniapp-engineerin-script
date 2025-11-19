@@ -107,7 +107,7 @@ export async function createApps(
             temPackageJson.version = version;
             temPackageJson.name = appConfig.packageName;
             temPackageJson.description = appConfig.description;
-            temPackageJson.scripts = distributionApp?.getAppScripts?.(appConfig) || {};
+            temPackageJson.scripts = (await distributionApp?.getAppScripts?.(appConfig)) || {};
             await fs.promises.writeFile(appPackageJsonPath, JSON.stringify(temPackageJson, null, 2) + "\n");
           })(),
           /**
