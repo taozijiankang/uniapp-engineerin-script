@@ -117,8 +117,6 @@ export async function createApps(
             if (!!opAppConfig) {
               const appPackConfig = await Promise.resolve(opAppConfig.getPackConfig(appConfig));
 
-              appPackConfig.project = appConfig.path.replace(/\\/g, "/");
-
               fs.writeFileSync(path.join(appConfig.path, AppPackConfigFilePath), JSON.stringify(appPackConfig, null, 2));
             }
           })(),

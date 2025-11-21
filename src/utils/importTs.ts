@@ -1,25 +1,25 @@
 import esbuild from "esbuild";
-import { rmSync } from "fs";
+import fs from "fs";
 import path from "path";
 import { pathToFileURL } from "url";
 
-/**
- * @param tsFilePath
- */
 export async function importTs(tsFilePath: string) {
   const outfile = path.join(path.dirname(tsFilePath), `./${Math.random().toString().replace(".", "")}-${Date.now()}.mjs`);
-  await esbuild.build({
-    bundle: true,
-    format: "esm",
-    entryPoints: [tsFilePath],
-    outfile,
-  });
   try {
-    const res = await import(pathToFileURL(outfile).toString());
-    return res;
-  } catch {
+    await esbuild.build({
+      bundle: true,
+      format: "esm",
+      entryPoints: [tsFilePath],
+      outfile,
+    });
+    const result = await import(pathToFileURL(outfile).toString());
+    return result;
+  } catch (e) {
+    console.error("importTs error", e);
+    throw e;
   } finally {
-    rmSync(outfile);
+    if (fs.statSync(outfile, { throwIfNoEntry: false })?.isFile()) {
+      fs.rmSync(outfile);
+    }
   }
-  return {};
 }
