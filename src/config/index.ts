@@ -1,12 +1,12 @@
 import fs from "fs";
 import path from "path";
-import { pathToFileURL } from "url";
 
 import { lookupFile } from "../utils/global.js";
 import { ProjectConfigFileName } from "../constants/index.js";
 import { generateProjectDirsConfig } from "./generateProjectDirsConfig.js";
 import { ProjectConfigExtend } from "../types/config.js";
 import { defineConfig } from "./defineConfig.js";
+import { transformRunTs } from "../utils/transformRunTs.js";
 
 let getConfigCache: Promise<ProjectConfigExtend> | null = null;
 
@@ -19,9 +19,7 @@ export async function getConfig() {
       }
       const projectRootDir = path.dirname(projectConfigPath);
 
-      let projectConfig: Parameters<typeof defineConfig>[0] = await import(pathToFileURL(projectConfigPath).toString()).then(
-        (res) => res.default
-      );
+      let projectConfig: Parameters<typeof defineConfig>[0] = await transformRunTs(projectConfigPath).then((res) => res.default);
 
       if (typeof projectConfig === "function") {
         projectConfig = await Promise.resolve(projectConfig());
