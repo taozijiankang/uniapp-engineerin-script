@@ -1,10 +1,3 @@
-export enum ProjectStartType {
-  /** 普通类型 */
-  COMMON = "common",
-  /** 发布类型 */
-  RELEASE = "release",
-}
-
 export enum AppStartMode {
   /** 开发模式 */
   DEV = "dev",
