@@ -8,8 +8,7 @@ import { getGitInfo } from "../utils/getGitInfo.js";
 import { AppConfigExtend } from "../types/config.js";
 import { UpdateVersionNumType } from "../constants/enum.js";
 import { UpdateVersionNumTypeDicts } from "../constants/dicts.js";
-import { getApps } from "../appManage/getApps.js";
-import { getConfig } from "../config/index.js";
+import { getProjectConfigExtend } from "../config/index.js";
 import { getRootDir } from "../pathManage.js";
 import { Command } from "../command/Command.js";
 import { StringCommandOption } from "../command/BaseCommandOption.js";
@@ -73,8 +72,8 @@ export class UploadMpCommand extends Command {
           console.error(chalk.red("请指定项目包名"));
           return;
         }
-        const config = await getConfig();
-        const appsConfig = getApps(config);
+        const config = await getProjectConfigExtend();
+        const { apps: appsConfig } = config;
         const appConfig = appsConfig.find((item) => item.packageName === packageName);
 
         if (!appConfig) {

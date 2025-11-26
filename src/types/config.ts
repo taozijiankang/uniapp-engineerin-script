@@ -66,6 +66,7 @@ export interface ProjectConfig {
 }
 
 export interface ProjectConfigExtend extends ProjectConfig {
+  apps: AppConfigExtend[];
   appSyncHandleNumber: number;
   dirs: {
     rootDir: string;

@@ -3,7 +3,7 @@ import path from "path";
 import chalk from "chalk";
 
 import { importTs } from "../utils/importTs.js";
-import { getConfig } from "../config/index.js";
+import { getProjectConfigExtend } from "../config/index.js";
 import { getAppPacks } from "../appManage/getAppPacks.js";
 import { PagesConfig } from "../types/pages.js";
 import { Command } from "../command/Command.js";
@@ -35,7 +35,7 @@ export class CreateAppPagesCommand extends Command {
 }
 
 async function createAppPages() {
-  const { createAppPagesHandler } = await getConfig();
+  const { createAppPagesHandler } = await getProjectConfigExtend();
 
   const currentCWDDir = process.cwd();
 

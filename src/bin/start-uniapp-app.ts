@@ -4,8 +4,7 @@ import fs from "fs";
 
 import { AppStartModeDicts } from "../constants/dicts.js";
 import { AppStartMode } from "../constants/enum.js";
-import { getConfig } from "../config/index.js";
-import { getApps } from "../appManage/getApps.js";
+import { getProjectConfigExtend } from "../config/index.js";
 import { runCommand } from "../utils/runCommand.js";
 import { AppPackConfigFilePath } from "../constants/index.js";
 import { AppConfigExtend } from "../types/config.js";
@@ -53,8 +52,8 @@ export class StartUniappAppCommand extends Command {
           console.error(chalk.red("请指定项目包名"));
           return;
         }
-        const config = await getConfig();
-        const appsConfig = getApps(config);
+        const config = await getProjectConfigExtend();
+        const { apps: appsConfig } = config;
         const appConfig = appsConfig.find((item) => item.packageName === packageName);
         if (!appConfig) {
           console.error(chalk.red(`未找到项目: ${packageName}`));
@@ -81,7 +80,7 @@ export class StartUniappAppCommand extends Command {
 export async function startApp(options: { appConfig: AppConfigExtend; mode: AppStartMode }) {
   const { appConfig, mode } = options;
 
-  const config = await getConfig();
+  const config = await getProjectConfigExtend();
 
   const HBuilderXAccount = await Promise.resolve(config.HBuilderX?.getHBuilderXAccount?.());
 

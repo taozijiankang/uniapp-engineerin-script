@@ -4,7 +4,7 @@ import chalk from "chalk";
 
 import { Command } from "../command/Command.js";
 import { importTs } from "../utils/importTs.js";
-import { getConfig } from "../config/index.js";
+import { getProjectConfigExtend } from "../config/index.js";
 import { getAppPacks } from "../appManage/getAppPacks.js";
 import { PagesConfig } from "../types/pages.js";
 import { getRunCode } from "../utils/global.js";
@@ -35,7 +35,7 @@ export class CreateCorePagesCommand extends Command {
 }
 
 async function createCorePages() {
-  const { createCorePagesHandler } = await getConfig();
+  const { createCorePagesHandler } = await getProjectConfigExtend();
 
   const currentCWDDir = process.cwd();
 
