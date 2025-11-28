@@ -122,9 +122,11 @@ export async function startApp(options: { appConfig: AppConfigExtend; mode: AppS
   }
   // 构建模式
   else if (mode === AppStartMode.BUILD) {
-    console.log(chalk.yellow(`开始云打包项目 ${appConfig.path}`));
+    const command = `${cliPath} pack --config ${path.join(appConfig.path, AppPackConfigFilePath)}`;
 
-    await runCommand(`${cliPath} pack --config ${path.join(appConfig.path, AppPackConfigFilePath)}`, { stdio: "inherit" });
+    console.log(chalk.green(`--------------------------------`));
+    console.log(chalk.green(`执行命令开始云打包: ${command}`));
+    console.log(chalk.green(`--------------------------------`));
   }
 }
 
