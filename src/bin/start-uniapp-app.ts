@@ -125,7 +125,7 @@ export async function startApp(options: { appConfig: AppConfigExtend; mode: AppS
     const command = `${cliPath} pack --config ${path.join(appConfig.path, AppPackConfigFilePath)}`;
 
     console.log(chalk.green(`--------------------------------`));
-    console.log(chalk.green(`执行命令开始云打包: ${command}`));
+    console.log(chalk.green(`执行命令开始云打包: ${command.replace(/\\/g, "/")}`));
     console.log(chalk.green(`--------------------------------`));
   }
 }
