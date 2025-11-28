@@ -63,7 +63,7 @@ export const Colors = [
   "#95e1d3",
   "#ff9a00",
   "#f07b3f",
-  "#6639a6"
+  "#6639a6",
 ];
 
 export const SuccessColor = "#228B22";

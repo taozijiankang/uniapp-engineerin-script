@@ -3,8 +3,7 @@ import inquirer from "inquirer";
 import fuzzy from "fuzzy";
 import path from "path";
 
-import { getApps } from "../appManage/getApps.js";
-import { getConfig } from "../config/index.js";
+import { getProjectConfigExtend } from "../config/index.js";
 import { SelectCommandOption } from "./SelectCommandOption.js";
 import { AppConfigExtend } from "../types/config.js";
 // @ts-expect-error
@@ -51,9 +50,9 @@ export class AppPackageNameChoiceCO extends SelectCommandOption {
   }
 
   private async init() {
-    const config = await getConfig();
+    const config = await getProjectConfigExtend();
 
-    this.appsConfig = getApps(config);
+    this.appsConfig = config.apps;
 
     this.options = this.appsConfig.map((app) => ({
       value: app.packageName,

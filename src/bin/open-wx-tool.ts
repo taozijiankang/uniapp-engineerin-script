@@ -5,8 +5,7 @@ import { globSync } from "glob";
 import http from "http";
 
 import { AppStartModeDicts } from "../constants/dicts.js";
-import { getConfig } from "../config/index.js";
-import { getApps } from "../appManage/getApps.js";
+import { getProjectConfigExtend } from "../config/index.js";
 import { isWindows } from "../utils/is.js";
 import { StringCommandOption } from "../command/BaseCommandOption.js";
 import { Command } from "../command/Command.js";
@@ -55,8 +54,8 @@ export class OpenWxToolCommand extends Command {
           console.error(chalk.red("请指定项目包名"));
           return;
         }
-        const config = await getConfig();
-        const appsConfig = getApps(config);
+        const config = await getProjectConfigExtend();
+        const { apps: appsConfig } = config;
         const appConfig = appsConfig.find((item) => item.packageName === packageName);
         if (!appConfig) {
           console.error(chalk.red(`未找到项目: ${packageName}`));

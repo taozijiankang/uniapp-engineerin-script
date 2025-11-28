@@ -1,15 +1,4 @@
-import { AppStartMode, ProjectStartType, ConfirmType, UpdateVersionNumType, OpenWxToolType } from "./enum.js";
-
-export const ProjectStartTypeDicts = [
-  {
-    value: ProjectStartType.COMMON,
-    label: "普通 正常开发",
-  },
-  {
-    value: ProjectStartType.RELEASE,
-    label: "发布 批量发布",
-  },
-];
+import { AppStartMode, ConfirmType, UpdateVersionNumType, OpenWxToolType } from "./enum.js";
 
 export const AppStartModeDicts = [
   {

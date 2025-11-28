@@ -1,5 +1,5 @@
 import { runCommand } from "../utils/runCommand.js";
-import { getConfig } from "../config/index.js";
+import { getProjectConfigExtend } from "../config/index.js";
 import { Command } from "../command/Command.js";
 import { SelectCommandOption } from "../command/SelectCommandOption.js";
 import { getRunCode } from "../utils/global.js";
@@ -18,7 +18,7 @@ export class RunsCommand extends Command {
     });
   }
   async setUp() {
-    const config = await getConfig();
+    const config = await getProjectConfigExtend();
 
     const runsCommandsOption = new SelectCommandOption({
       name: "runsCommands",

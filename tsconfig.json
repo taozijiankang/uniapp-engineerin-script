@@ -1,5 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tsconfig.cache/tsconfig.tsbuildinfo"
+  },
   "references": [
     {
       "path": "./tsconfig.core.json"

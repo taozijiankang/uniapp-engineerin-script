@@ -1,7 +1,6 @@
 import chalk from "chalk";
 
-import { getConfig } from "../config/index.js";
-import { getApps } from "../appManage/getApps.js";
+import { getProjectConfigExtend } from "../config/index.js";
 import { createApps } from "../appManage/createApps.js";
 import { Command } from "../command/Command.js";
 import { StringCommandOption } from "../command/BaseCommandOption.js";
@@ -43,8 +42,8 @@ export class CreateAppCommand extends Command {
           .map((item) => item.trim())
           .filter(Boolean);
 
-        const config = await getConfig();
-        const appsConfig = getApps(config);
+        const config = await getProjectConfigExtend();
+        const { apps: appsConfig } = config;
         const appConfigs = appsConfig.filter((item) => packageNames.includes(item.packageName));
 
         if (appConfigs.length === 0) {
