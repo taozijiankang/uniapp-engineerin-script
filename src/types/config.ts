@@ -1,5 +1,4 @@
 import { Loader } from "../appManage/loader/type.js";
-import { AppPackConfig } from "./appPackConfig.js";
 import { ToPromise } from "./glob.js";
 import { Page } from "./pages.js";
 import { Command } from "../command/Command.js";
@@ -30,10 +29,6 @@ export interface ProjectConfig {
   /** apps 目录 */
   appsDir: string;
   apps: AppConfig[];
-  /** app配置 */
-  app?: {
-    getPackConfig: (appConfig: AppConfigExtend) => ToPromise<AppPackConfig>;
-  };
   /** 分发 app */
   distributionApp?: {
     /** 加载器 */
@@ -99,7 +94,7 @@ export interface AppConfig<AppEnv extends any = any> {
   }[];
 }
 
-export interface AppConfigExtend extends AppConfig {
+export interface AppConfigExtend<AppEnv extends any = any> extends AppConfig<AppEnv> {
   /** app 索引 */
   index: number;
   /** app 包名 全局唯一 @项目名称-app/目录名称-app名字 */

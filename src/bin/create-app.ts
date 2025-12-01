@@ -56,7 +56,6 @@ export class CreateAppCommand extends Command {
           appSyncHandleNumber: config.appSyncHandleNumber,
           appEnvKeyDicts: config.appEnvKeyDicts,
           distributionApp: config.distributionApp,
-          opAppConfig: config.app,
         });
       },
     };

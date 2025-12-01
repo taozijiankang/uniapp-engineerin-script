@@ -5,7 +5,6 @@ import path from "path";
 import { chunkArray, hasDir, hasFile } from "../utils/global.js";
 import { isWindows } from "../utils/is.js";
 import { AppConfigExtend, ProjectConfigExtend } from "../types/config.js";
-import { AppPackConfigFilePath } from "../constants/index.js";
 
 export async function createApps(
   appsConfig: AppConfigExtend[],
@@ -14,10 +13,9 @@ export async function createApps(
     appSyncHandleNumber: number;
     appEnvKeyDicts: ProjectConfigExtend["appEnvKeyDicts"];
     distributionApp: ProjectConfigExtend["distributionApp"];
-    opAppConfig: ProjectConfigExtend["app"];
   }
 ) {
-  const { appShellsDir, appSyncHandleNumber, appEnvKeyDicts, distributionApp, opAppConfig } = op;
+  const { appShellsDir, appSyncHandleNumber, appEnvKeyDicts, distributionApp } = op;
 
   const getAppShellDir = (appConfig: AppConfigExtend) => {
     const p = path.join(appShellsDir, appConfig.uniappShellType);
@@ -109,16 +107,6 @@ export async function createApps(
             temPackageJson.description = appConfig.description;
             temPackageJson.scripts = (await distributionApp?.getAppScripts?.(appConfig)) || {};
             await fs.promises.writeFile(appPackageJsonPath, JSON.stringify(temPackageJson, null, 2) + "\n");
-          })(),
-          /**
-           * 生成 app pack 配置文件
-           */
-          (async () => {
-            if (!!opAppConfig) {
-              const appPackConfig = await Promise.resolve(opAppConfig.getPackConfig(appConfig));
-
-              fs.writeFileSync(path.join(appConfig.path, AppPackConfigFilePath), JSON.stringify(appPackConfig, null, 2));
-            }
           })(),
           /**
            * 创建符号链接
