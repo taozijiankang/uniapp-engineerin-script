@@ -1,12 +1,10 @@
 import chalk from "chalk";
-import path from "path";
 import fs from "fs";
 
 import { AppStartModeDicts } from "../constants/dicts.js";
 import { AppStartMode } from "../constants/enum.js";
 import { getProjectConfigExtend } from "../config/index.js";
 import { runCommand } from "../utils/runCommand.js";
-import { AppPackConfigFilePath } from "../constants/index.js";
 import { AppConfigExtend } from "../types/config.js";
 import { Command } from "../command/Command.js";
 import { StringCommandOption } from "../command/BaseCommandOption.js";
@@ -102,7 +100,7 @@ export async function startApp(options: { appConfig: AppConfigExtend; mode: AppS
     await runCommand(`${cliPath} open`, { stdio: "inherit" });
   }
 
-  // 再登录
+  // 登录
   if (HBuilderXAccount?.username && HBuilderXAccount.password) {
     const { stdoutData: userInfo } = await runCommand(`${cliPath} user info`);
     if (!new RegExp(`^${HBuilderXAccount?.username || ""}$`, "m").test(userInfo.toString())) {
@@ -122,10 +120,8 @@ export async function startApp(options: { appConfig: AppConfigExtend; mode: AppS
   }
   // 构建模式
   else if (mode === AppStartMode.BUILD) {
-    const command = `${cliPath} pack --config ${path.join(appConfig.path, AppPackConfigFilePath)}`;
-
     console.log(chalk.green(`--------------------------------`));
-    console.log(chalk.green(`执行命令开始云打包: ${command.replace(/\\/g, "/")}`));
+    console.log(chalk.green(`请手动在 HBuilderX 中进行云打包`));
     console.log(chalk.green(`--------------------------------`));
   }
 }
