@@ -10,6 +10,7 @@ import { Command } from "../command/Command.js";
 import { StringCommandOption } from "../command/BaseCommandOption.js";
 import { SelectCommandOption } from "../command/SelectCommandOption.js";
 import { getRunCode } from "../utils/global.js";
+import dayjs from "dayjs";
 
 const COMMAND_NAME = "start-uniapp-app";
 
@@ -65,6 +66,7 @@ export class StartUniappAppCommand extends Command {
         await startApp({
           appConfig,
           mode: mode as AppStartMode,
+          projectPath: config.dirs.rootDir,
         });
       },
     };
@@ -75,8 +77,8 @@ export class StartUniappAppCommand extends Command {
   }
 }
 
-export async function startApp(options: { appConfig: AppConfigExtend; mode: AppStartMode }) {
-  const { appConfig, mode } = options;
+export async function startApp(options: { appConfig: AppConfigExtend; mode: AppStartMode; projectPath: string }) {
+  const { appConfig, mode, projectPath } = options;
 
   const config = await getProjectConfigExtend();
 
@@ -120,13 +122,15 @@ export async function startApp(options: { appConfig: AppConfigExtend; mode: AppS
   }
   // 构建模式
   else if (mode === AppStartMode.BUILD) {
+    const commitMessage = await getCommitMessage(projectPath);
+    const packName = `${appConfig.name}-${commitMessage}-${dayjs().format("YY-MM-DD-HH-mm")}`;
     console.log(chalk.green(`--------------------------------`));
-    console.log(chalk.green(`请手动在 HBuilderX 中进行云打包`));
+    console.log(chalk.green(`请手动在 HBuilderX 中进行云打包 推荐使用 ${packName} 作为包名`));
     console.log(chalk.green(`--------------------------------`));
   }
 }
 
-export async function HBuilderXIsOpen(cliPath: string) {
+async function HBuilderXIsOpen(cliPath: string) {
   /**
    * 这里用 --help 命令来判断 HBuilderX 是否启动
    * 因为 --help 命令需要启动 HBuilderX 才有结果
@@ -134,4 +138,11 @@ export async function HBuilderXIsOpen(cliPath: string) {
   const { stdoutData: helpData } = await runCommand(`${cliPath} --help`);
 
   return helpData.toString().length > 10;
+}
+
+async function getCommitMessage(projectPath: string) {
+  const { stdoutData: commitHash } = await runCommand(`git log -1 --pretty=%h`, {
+    cwd: projectPath,
+  });
+  return commitHash.toString().trim();
 }
