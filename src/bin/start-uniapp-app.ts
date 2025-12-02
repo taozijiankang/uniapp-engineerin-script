@@ -1,5 +1,8 @@
 import chalk from "chalk";
 import fs from "fs";
+import path from "path";
+import dayjs from "dayjs";
+import { parse as JSONParse } from "comment-json";
 
 import { AppStartModeDicts } from "../constants/dicts.js";
 import { AppStartMode } from "../constants/enum.js";
@@ -10,7 +13,6 @@ import { Command } from "../command/Command.js";
 import { StringCommandOption } from "../command/BaseCommandOption.js";
 import { SelectCommandOption } from "../command/SelectCommandOption.js";
 import { getRunCode } from "../utils/global.js";
-import dayjs from "dayjs";
 
 const COMMAND_NAME = "start-uniapp-app";
 
@@ -123,7 +125,11 @@ export async function startApp(options: { appConfig: AppConfigExtend; mode: AppS
   // 构建模式
   else if (mode === AppStartMode.BUILD) {
     const commitMessage = await getCommitMessage(projectPath);
-    const packName = `${appConfig.name}-${commitMessage}-${dayjs().format("YY-MM-DD-HH-mm")}`;
+    const versionNumber =
+      (JSONParse(fs.readFileSync(path.join(appConfig.path, "src/manifest.json"), "utf8").toString() || "{}") as any)
+        ?.versionName || "1.0.0";
+    const versionName = versionNumber.split(".").join("_");
+    const packName = `${appConfig.name}-${versionName}-${commitMessage}-${dayjs().format("YY-MM-DD-HH-mm")}`;
     console.log(chalk.green(`--------------------------------`));
     console.log(chalk.green(`请手动在 HBuilderX 中进行云打包 推荐使用 ${packName} 作为包名`));
     console.log(chalk.green(`--------------------------------`));
